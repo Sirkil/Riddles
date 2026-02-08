@@ -7,111 +7,203 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
-    :root {
-        --primary: #6C63FF;
-        --secondary: #FF6584;
-        --bg: #F3F5F9;
-        --surface: #ffffff;
-        --text: #2D3436;
+    /* --- CSS VARIABLES & RESET --- */
+    :root { 
+        --primary: #6C63FF; 
+        --secondary: #FF6584; 
+        --bg: #F3F5F9; 
+        --surface: #ffffff; 
+        --text: #2D3436; 
+    }
+    
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: var(--bg); 
+        margin: 0; 
+        padding: 0; 
+        display: flex; 
+        justify-content: center; /* Centers the phone frame horizontally */
+        align-items: center;     /* Centers the phone frame vertically */
+        min-height: 100vh; 
+        overflow-x: hidden; 
+        color: var(--text);
+        -webkit-tap-highlight-color: transparent; 
+    }
+    
+    /* --- PHONE FRAME CONTAINER --- */
+    .app-container { 
+        width: 100%; 
+        max-width: 480px; /* Mobile width constraint */
+        background: var(--surface); 
+        height: 100vh; /* Full height */
+        max-height: 100vh; /* Prevent scrolling outside container */
+        position: relative; 
+        box-shadow: 0 0 40px rgba(0,0,0,0.1); 
+        display: flex; 
+        flex-direction: column; 
+        overflow: hidden; /* Hide scrollbars */
     }
 
-    body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
-    
-    /* Mobile-first Container */
-    .app-container { width: 100%; max-width: 500px; background: var(--surface); min-height: 100vh; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
-
-    /* Screens */
-    .screen { display: none; padding: 20px; flex-grow: 1; flex-direction: column; animation: fadeIn 0.3s ease; }
+    /* --- SCREENS --- */
+    .screen { 
+        display: none; 
+        padding: 25px; 
+        flex-grow: 1; 
+        flex-direction: column; 
+        justify-content: center; /* Centers content inside the screen */
+        overflow-y: auto; 
+        animation: fadeIn 0.3s ease; 
+    }
     .screen.active { display: flex; }
-
-    /* Login/Register */
-    .auth-box { text-align: center; margin-top: 40px; }
-    .auth-box h1 { color: var(--primary); font-size: 28px; margin-bottom: 30px; }
-    input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s; box-sizing: border-box; }
-    input:focus { border-color: var(--primary); }
     
-    button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3); transition: transform 0.1s; }
+    /* Home screen shouldn't be centered vertically, it flows top-down */
+    #home-screen { justify-content: flex-start; padding: 0; }
+
+    /* --- AUTH STYLES --- */
+    .auth-box { text-align: center; width: 100%; }
+    .auth-box h1 { margin-bottom: 30px; color: var(--primary); }
+    
+    input { 
+        width: 100%; padding: 16px; margin: 8px 0; 
+        border: 2px solid #f0f0f0; border-radius: 12px; 
+        font-size: 16px; outline: none; transition: 0.3s; 
+        box-sizing: border-box; 
+    }
+    input:focus { border-color: var(--primary); background: #fdfdff; }
+    
+    button { 
+        width: 100%; padding: 16px; margin-top: 20px; 
+        background: var(--primary); color: white; 
+        border: none; border-radius: 12px; 
+        font-size: 16px; font-weight: bold; cursor: pointer; 
+        transition: transform 0.1s, opacity 0.2s; 
+    }
     button:active { transform: scale(0.98); }
-    .secondary-btn { background: transparent; color: var(--primary); box-shadow: none; border: 2px solid var(--primary); }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    
+    .secondary-btn { 
+        background: transparent; color: var(--primary); 
+        border: 2px solid var(--primary); margin-top: 10px; 
+    }
 
-    /* Home Header */
-    .header { background: linear-gradient(135deg, var(--primary), #8e86ff); color: white; padding: 20px; border-radius: 0 0 25px 25px; box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2); display: flex; justify-content: space-between; align-items: center; }
-    .score-badge { background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    /* --- HOME HEADER --- */
+    .header { 
+        background: linear-gradient(135deg, var(--primary), #8e86ff); 
+        color: white; padding: 25px; 
+        border-radius: 0 0 30px 30px; 
+        display: flex; justify-content: space-between; align-items: center; 
+        box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2); 
+        margin-bottom: 10px;
+    }
+    .score-badge { 
+        background: rgba(255,255,255,0.2); 
+        padding: 8px 15px; border-radius: 20px; 
+        font-weight: bold; display: flex; gap: 8px; align-items: center; 
+    }
 
-    /* Level Grid */
-    .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; margin-top: 10px; }
+    /* --- LEVEL GRID --- */
+    .level-grid { 
+        display: grid; grid-template-columns: repeat(4, 1fr); 
+        gap: 12px; padding: 20px; padding-bottom: 80px; /* Space for scroll */
+    }
     .level-card { 
-        aspect-ratio: 1; background: white; border-radius: 16px; 
+        aspect-ratio: 1; background: white; border-radius: 18px; 
         display: flex; justify-content: center; align-items: center; 
-        font-size: 20px; font-weight: bold; color: var(--text);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative;
-        transition: 0.2s; border: 2px solid transparent;
+        font-size: 20px; font-weight: 700; color: var(--text);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative;
+        transition: 0.2s; border: 2px solid transparent; 
+    }
+    
+    .level-card.open { cursor: pointer; border-color: #e0e0ff; color: var(--primary); }
+    .level-card.open:active { transform: scale(0.95); }
+    
+    .level-card.locked { opacity: 0.4; background: #eee; pointer-events: none; }
+    .level-card.locked::after { 
+        content: '\f023'; font-family: "Font Awesome 6 Free"; 
+        position: absolute; font-size: 12px; color: #666; bottom: 8px; 
+    }
+    
+    .level-card.completed { 
+        background: #eafff0; border-color: #2ecc71; color: #2ecc71; opacity: 1; 
+    }
+    .level-card.completed::after { 
+        content: '\f00c'; font-family: "Font Awesome 6 Free"; 
+        position: absolute; font-size: 12px; bottom: 6px; right: 8px; 
     }
 
-    /* States */
-    .level-card.locked { opacity: 0.4; background: #e0e0e0; pointer-events: none; }
-    .level-card.locked::after { content: '\f023'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; font-size: 14px; color: #666; }
-    
-    .level-card.open { cursor: pointer; border-color: var(--primary); background: #fdfdff; }
-    .level-card.open:active { transform: scale(0.9); }
+    /* --- QUIZ --- */
+    .quiz-question { 
+        font-size: 22px; text-align: center; 
+        margin: 0 0 30px 0; color: #333; font-weight: 600; line-height: 1.4; 
+    }
+    .option-btn { 
+        background: white; color: #555; border: 2px solid #eee; 
+        margin-top: 12px; padding: 15px; font-weight: 500; text-align: left;
+    }
+    .option-btn:hover { background: #f9f9f9; }
 
-    .level-card.completed { opacity: 1; border-color: #2ecc71; color: #2ecc71; background: #eafff0; }
-    .level-card.completed .badge-overlay {
-        position: absolute; top: -8px; right: -8px; background: #2ecc71; color: white;
-        font-size: 10px; padding: 2px 6px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;
-        box-shadow: 0 2px 5px rgba(46, 204, 113, 0.3);
+    /* --- ADMIN --- */
+    .fab { 
+        position: absolute; bottom: 20px; right: 20px; 
+        width: 50px; height: 50px; background: #333; color: white; 
+        border-radius: 50%; display: flex; justify-content: center; 
+        align-items: center; cursor: pointer; opacity: 0.2; z-index: 10; 
+    }
+    .admin-row { 
+        background: white; padding: 15px; margin-bottom: 10px; 
+        border-radius: 12px; border: 1px solid #eee; 
+    }
+    .admin-row input { padding: 8px; margin: 4px 0; font-size: 14px; }
+
+    /* --- LOADER OVERLAY --- */
+    .loader-overlay { 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(255,255,255,0.8); display: none; 
+        justify-content: center; align-items: center; z-index: 100; 
+        backdrop-filter: blur(2px); 
+    }
+    .spinner { 
+        width: 40px; height: 40px; border: 4px solid #eee; 
+        border-top: 4px solid var(--primary); border-radius: 50%; 
+        animation: spin 0.8s linear infinite; 
     }
 
-    /* Admin Panel */
-    .admin-row { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #eee; }
-    .admin-row input { margin: 5px 0; padding: 8px; font-size: 14px; }
-    .toggle-switch { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
-    
-    /* Quiz */
-    .quiz-question { font-size: 20px; text-align: center; margin: 30px 0; color: #333; font-weight: 600; }
-    .option-btn { background: white; color: var(--text); border: 2px solid #eee; margin-top: 10px; color: #555; }
-    .option-btn.selected { border-color: var(--primary); background: #f4f3ff; color: var(--primary); }
-
-    /* Dialog */
-    .dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
-    .dialog { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 80%; max-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .fab { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: #333; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0.3; }
 </style>
 </head>
 <body>
 
 <div class="app-container">
     
+    <div id="loader" class="loader-overlay"><div class="spinner"></div></div>
+
     <div id="login-screen" class="screen active">
         <div class="auth-box">
-            <h1>🎮 Game Login</h1>
-            <input type="email" id="login-email" placeholder="Email Address">
+            <h1>🎮 Game App</h1>
+            <input type="email" id="login-email" placeholder="Enter Email Address">
             <button onclick="login()">Start Playing</button>
-            <button class="secondary-btn" onclick="showScreen('register-screen')">New Player</button>
+            <button class="secondary-btn" onclick="showScreen('register-screen')">Create Account</button>
         </div>
         <div class="fab" onclick="showAdminLogin()"><i class="fas fa-cog"></i></div>
     </div>
 
     <div id="register-screen" class="screen">
         <div class="auth-box">
-            <h1>Create Profile</h1>
-            <input type="text" id="reg-name" placeholder="Name">
-            <input type="tel" id="reg-phone" placeholder="Phone">
-            <input type="email" id="reg-email" placeholder="Email">
-            <button onclick="register()">Let's Go!</button>
+            <h1>New Player</h1>
+            <input type="text" id="reg-name" placeholder="Full Name">
+            <input type="tel" id="reg-phone" placeholder="Phone Number">
+            <input type="email" id="reg-email" placeholder="Email Address">
+            <button onclick="register()">Register & Play</button>
             <button class="secondary-btn" onclick="showScreen('login-screen')">Back</button>
         </div>
     </div>
 
-    <div id="home-screen" class="screen" style="padding:0">
+    <div id="home-screen" class="screen">
         <div class="header">
             <div>
-                <div style="font-size: 12px; opacity: 0.8;">Player</div>
-                <div id="display-name" style="font-size: 18px; font-weight: bold;">User</div>
+                <div style="font-size: 13px; opacity: 0.9;">Welcome,</div>
+                <div id="display-name" style="font-size: 20px; font-weight: 700;">Player</div>
             </div>
             <div class="score-badge">
                 <i class="fas fa-star" style="color: #ffd700"></i>
@@ -119,28 +211,28 @@
             </div>
         </div>
         <div class="level-grid" id="level-grid"></div>
-        <button onclick="logout()" class="secondary-btn" style="margin: 20px; width: calc(100% - 40px); align-self: center;">Logout</button>
+        <button onclick="logout()" class="secondary-btn" style="width: 90%; margin: 0 auto 20px auto;">Logout</button>
     </div>
 
     <div id="start-screen" class="screen">
         <div class="auth-box">
-            <h1 id="level-title">Level 1</h1>
-            <p style="color:#666; margin-bottom: 30px;">Tap start to unlock the challenge.</p>
-            <div style="font-size: 40px; margin-bottom: 20px;">🚀</div>
-            <button onclick="confirmStart()">Start (+3 pts)</button>
+            <h1 id="level-title">Level X</h1>
+            <p style="color:#666; margin-bottom: 40px;">Press start to unlock the question.</p>
+            <div style="font-size: 60px; margin-bottom: 30px;">🚀</div>
+            <button onclick="instantStartLevel()">Start Game (+3 pts)</button>
             <button class="secondary-btn" onclick="showScreen('home-screen')">Cancel</button>
         </div>
     </div>
 
     <div id="quiz-screen" class="screen">
         <div class="quiz-question" id="q-text">Loading...</div>
-        <div id="q-options"></div>
+        <div id="q-options" style="width: 100%;"></div>
     </div>
 
-    <div id="admin-screen" class="screen" style="background: #eee; overflow-y: auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>⚙️ Admin Panel</h2>
-            <button style="width:auto; padding: 8px 15px; margin:0;" onclick="saveAdminData()">Save All</button>
+    <div id="admin-screen" class="screen" style="background: #f4f4f4; justify-content: flex-start; padding: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+            <h2 style="margin:0">Admin Panel</h2>
+            <button style="width:auto; margin:0; padding:8px 15px;" onclick="saveAdminData()">Save All</button>
         </div>
         <div id="admin-list"></div>
         <button class="secondary-btn" onclick="logout()">Exit Admin</button>
@@ -148,59 +240,49 @@
 
 </div>
 
-<div id="msg-dialog" class="dialog-overlay">
-    <div class="dialog">
-        <div style="font-size: 40px; margin-bottom: 10px;" id="dialog-icon">ℹ️</div>
-        <h3 id="dialog-title">Alert</h3>
-        <p id="dialog-body">Message</p>
-        <button onclick="closeDialog()">OK</button>
-    </div>
-</div>
-
 <script>
+    // --- CONFIGURATION ---
     const API_URL = 'https://script.google.com/macros/s/AKfycbytYCxHssnHE1fKPcA1rUxIIFJlYXTED3O6nrT-9A1SXbq4iidpOWDWSqCMC2O-W6hb/exec'; // <--- PASTE HERE
 
+    // --- STATE ---
     let currentUser = null;
-    let gameConfig = []; // Stores questions and active status
-    let currentLevel = null;
+    let gameConfig = [];
+    let currentLevelId = 0;
     let adminPass = '';
 
-    // --- UTILS ---
+    // --- UI HELPERS ---
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    function showDialog(title, body, icon='ℹ️') {
-        document.getElementById('dialog-title').innerText = title;
-        document.getElementById('dialog-body').innerText = body;
-        document.getElementById('dialog-icon').innerText = icon;
-        document.getElementById('msg-dialog').style.display = 'flex';
+    function toggleLoader(show) {
+        document.getElementById('loader').style.display = show ? 'flex' : 'none';
     }
 
-    function closeDialog() {
-        document.getElementById('msg-dialog').style.display = 'none';
-    }
-
-    // --- AUTH ---
+    // --- AUTHENTICATION ---
     function login() {
         const email = document.getElementById('login-email').value;
-        if(!email) return showDialog('Error', 'Enter email');
+        if(!email) return alert("Please enter email");
         
+        toggleLoader(true);
         fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email }) })
         .then(r => r.json())
         .then(data => {
+            toggleLoader(false);
             if(data.status === 'success') {
                 currentUser = data.user;
                 gameConfig = data.gameConfig;
                 initHome();
             } else {
-                showDialog('Oops', data.message, '⚠️');
+                alert(data.message);
             }
-        });
+        })
+        .catch(() => { toggleLoader(false); alert("Connection failed"); });
     }
 
     function register() {
+        toggleLoader(true);
         const data = {
             action: 'register',
             name: document.getElementById('reg-name').value,
@@ -210,11 +292,122 @@
         fetch(API_URL, { method: 'POST', body: JSON.stringify(data) })
         .then(r => r.json())
         .then(resp => {
+            toggleLoader(false);
             if(resp.status === 'success') {
                 currentUser = resp.user;
                 gameConfig = resp.gameConfig;
                 initHome();
-            } else showDialog('Error', resp.message);
+            } else alert(resp.message);
+        });
+    }
+
+    // --- HOME & GAMEPLAY ---
+    function initHome() {
+        document.getElementById('display-name').innerText = currentUser.name;
+        document.getElementById('display-score').innerText = currentUser.totalScore;
+        const grid = document.getElementById('level-grid');
+        grid.innerHTML = '';
+
+        for(let i=0; i<20; i++) {
+            const levelNum = i + 1;
+            const config = gameConfig[i] || { isActive: false };
+            const userLevelData = currentUser.levels[levelNum];
+            const isCompleted = userLevelData && userLevelData.status === 'completed';
+
+            const card = document.createElement('div');
+            card.className = 'level-card';
+            card.innerText = levelNum;
+
+            if (isCompleted) {
+                card.classList.add('completed');
+                card.onclick = () => alert(`Level ${levelNum} Completed!\nScore: ${userLevelData.score}`);
+            } else if (config.isActive) {
+                card.classList.add('open');
+                card.onclick = () => preloadLevel(levelNum);
+            } else {
+                card.classList.add('locked');
+            }
+            grid.appendChild(card);
+        }
+        showScreen('home-screen');
+    }
+
+    function preloadLevel(id) {
+        currentLevelId = id;
+        document.getElementById('level-title').innerText = `Level ${id}`;
+        showScreen('start-screen');
+    }
+
+    // --- OPTIMISTIC GAME LOGIC (NO LAG) ---
+    function instantStartLevel() {
+        // 1. Update Local State Instantly
+        if (!currentUser.levels[currentLevelId]) {
+            currentUser.levels[currentLevelId] = { status: 'started', score: 3 };
+            currentUser.totalScore += 3;
+        }
+        
+        // 2. Render Quiz Instantly
+        const qData = gameConfig[currentLevelId - 1];
+        document.getElementById('q-text').innerText = qData.question;
+        const optContainer = document.getElementById('q-options');
+        optContainer.innerHTML = '';
+        
+        qData.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            // Handle click
+            btn.onclick = () => handleAnswer(idx + 1, btn);
+            optContainer.appendChild(btn);
+        });
+        showScreen('quiz-screen');
+
+        // 3. Sync Background
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'start' })
+        });
+    }
+
+    function handleAnswer(selectedIdx, btnElement) {
+        // Disable all buttons to prevent double click
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => { b.disabled = true; b.style.opacity = 0.5; });
+        btnElement.style.opacity = 1;
+        btnElement.innerText += " (Checking...)";
+
+        // Check Server
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'updateScore', 
+                email: currentUser.email, 
+                levelId: currentLevelId, 
+                stage: 'finish',
+                selectedOption: selectedIdx 
+            })
+        })
+        .then(r => r.json())
+        .then(d => {
+            currentUser.totalScore = d.totalScore;
+            currentUser.levels = d.levels;
+            
+            if(d.isCorrect) {
+                btnElement.style.background = '#2ecc71'; // Green
+                btnElement.style.color = 'white';
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                setTimeout(() => {
+                    alert("Correct! +7 Points");
+                    initHome();
+                }, 500);
+            } else {
+                btnElement.style.background = '#e74c3c'; // Red
+                btnElement.style.color = 'white';
+                setTimeout(() => {
+                    alert("Wrong answer. +4 Points");
+                    initHome();
+                }, 500);
+            }
         });
     }
 
@@ -223,157 +416,49 @@
         showScreen('login-screen');
     }
 
-    // --- HOME & GRID ---
-    function initHome() {
-        document.getElementById('display-name').innerText = currentUser.name;
-        document.getElementById('display-score').innerText = currentUser.totalScore;
-        
-        const grid = document.getElementById('level-grid');
-        grid.innerHTML = '';
-
-        // 20 Levels
-        for(let i=0; i<20; i++) {
-            const config = gameConfig[i] || { id: i+1, isActive: false };
-            const levelId = i + 1;
-            const userLevelData = currentUser.levels[levelId];
-            const isCompleted = userLevelData && userLevelData.status === 'completed';
-
-            const card = document.createElement('div');
-            card.className = 'level-card';
-            card.innerText = levelId;
-
-            // Logic: 
-            // 1. If Completed -> Show Completed Style + Click shows score
-            // 2. If Active (Admin set true) -> Open Style + Click starts game
-            // 3. If Inactive -> Locked Style (Gray + Lock icon)
-            
-            if (isCompleted) {
-                card.classList.add('completed');
-                card.innerHTML += `<div class="badge-overlay">DONE</div>`;
-                card.onclick = () => showDialog('Completed', `You scored: ${userLevelData.score} points`, '🏆');
-            } else if (config.isActive) {
-                card.classList.add('open');
-                card.onclick = () => preloadLevel(levelId);
-            } else {
-                card.classList.add('locked'); // Low opacity handled by CSS
-            }
-
-            grid.appendChild(card);
-        }
-        showScreen('home-screen');
-    }
-
-    // --- GAMEPLAY ---
-    function preloadLevel(id) {
-        currentLevel = id;
-        document.getElementById('level-title').innerText = `Level ${id}`;
-        showScreen('start-screen');
-    }
-
-    function confirmStart() {
-        // Send +3 Points
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
-            action: 'updateScore', email: currentUser.email, levelId: currentLevel, stage: 'start' 
-        })})
-        .then(r => r.json())
-        .then(d => {
-            currentUser.totalScore = d.totalScore;
-            currentUser.levels = d.levels;
-            startQuiz();
-        });
-    }
-
-    function startQuiz() {
-        // Find question in local config (array index is levelId - 1)
-        const qData = gameConfig[currentLevel - 1];
-        document.getElementById('q-text').innerText = qData.question;
-        const optContainer = document.getElementById('q-options');
-        optContainer.innerHTML = '';
-
-        qData.options.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            // Option index 1-4
-            btn.onclick = () => finishQuiz(idx + 1); 
-            optContainer.appendChild(btn);
-        });
-
-        showScreen('quiz-screen');
-    }
-
-    function finishQuiz(selectedOptIndex) {
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
-            action: 'updateScore', 
-            email: currentUser.email, 
-            levelId: currentLevel, 
-            stage: 'finish',
-            selectedOption: selectedOptIndex 
-        })})
-        .then(r => r.json())
-        .then(d => {
-            currentUser.totalScore = d.totalScore;
-            currentUser.levels = d.levels;
-            
-            if(d.isCorrect) {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                showDialog('Correct!', '+7 Points added!', '🎉');
-            } else {
-                showDialog('Wrong Answer', '+4 Points added.', '😔');
-            }
-            initHome();
-        });
-    }
-
-    // --- ADMIN ---
+    // --- ADMIN PANEL ---
     function showAdminLogin() {
-        const pass = prompt("Enter Admin Password:");
+        const pass = prompt("Admin Password:");
         if(!pass) return;
-        adminPass = pass;
-        
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminLoad', pass: adminPass }) })
+        toggleLoader(true);
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminLoad', pass }) })
         .then(r => r.json())
         .then(d => {
+            toggleLoader(false);
             if(d.status === 'success') {
-                renderAdminPanel(d.data);
+                renderAdmin(d.data);
+                adminPass = pass;
                 showScreen('admin-screen');
-            } else {
-                alert('Wrong Password');
-            }
+            } else alert("Wrong password");
         });
     }
 
-    function renderAdminPanel(data) {
+    function renderAdmin(data) {
         const list = document.getElementById('admin-list');
         list.innerHTML = '';
-        // Data structure: [ID, Q, O1, O2, O3, O4, Correct, Active]
         data.forEach((row, i) => {
-            const div = document.createElement('div');
-            div.className = 'admin-row';
-            div.innerHTML = `
-                <strong>Level ${row[0]}</strong><br>
-                <input type="text" value="${row[1]}" id="q-${i}">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                    <input type="text" value="${row[2]}" id="o1-${i}">
-                    <input type="text" value="${row[3]}" id="o2-${i}">
-                    <input type="text" value="${row[4]}" id="o3-${i}">
-                    <input type="text" value="${row[5]}" id="o4-${i}">
+            list.innerHTML += `
+            <div class="admin-row">
+                <b>Level ${row[0]}</b>
+                <input id="q-${i}" value="${row[1]}" placeholder="Question">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px">
+                    <input id="o1-${i}" value="${row[2]}"> <input id="o2-${i}" value="${row[3]}">
+                    <input id="o3-${i}" value="${row[4]}"> <input id="o4-${i}" value="${row[5]}">
                 </div>
-                Correct (1-4): <input type="number" value="${row[6]}" id="c-${i}" style="width:50px">
-                <div class="toggle-switch">
-                    <input type="checkbox" id="a-${i}" ${row[7] ? 'checked' : ''}> <label>Is Open?</label>
+                <div style="margin-top:5px; display:flex; justify-content:space-between;">
+                    <label>Correct (1-4): <input type="number" id="c-${i}" value="${row[6]}" style="width:40px"></label>
+                    <label>Open: <input type="checkbox" id="a-${i}" ${row[7]?'checked':''}></label>
                 </div>
-            `;
-            list.appendChild(div);
+            </div>`;
         });
     }
 
     function saveAdminData() {
+        toggleLoader(true);
         const rows = [];
-        // Loop 20 levels
         for(let i=0; i<20; i++) {
             rows.push([
-                i+1, // ID
+                i+1,
                 document.getElementById(`q-${i}`).value,
                 document.getElementById(`o1-${i}`).value,
                 document.getElementById(`o2-${i}`).value,
@@ -383,17 +468,10 @@
                 document.getElementById(`a-${i}`).checked
             ]);
         }
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
-            action: 'adminSave', pass: adminPass, rows: rows 
-        })})
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminSave', pass: adminPass, rows }) })
         .then(r => r.json())
-        .then(d => {
-            if(d.status === 'success') alert('Saved!');
-            else alert('Error saving');
-        });
+        .then(d => { toggleLoader(false); alert("Saved successfully!"); });
     }
-
 </script>
 </body>
 </html>
