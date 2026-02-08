@@ -28,28 +28,59 @@
 
     /* Grid */
     .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; padding-bottom: 80px; }
-    .level-card { aspect-ratio: 1; background: white; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent; }
+    .level-card { aspect-ratio: 1; background: white; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent; overflow: hidden; }
     .level-card.open { cursor: pointer; border-color: #e0e0ff; color: var(--primary); }
     .level-card.locked { opacity: 0.4; background: #eee; pointer-events: none; }
     .level-card.locked::after { content: '\f023'; font-family: "Font Awesome 6 Free"; position: absolute; font-size: 12px; color: #666; bottom: 8px; }
-    .level-card.completed { background: #eafff0; border-color: #2ecc71; color: #2ecc71; }
-    .level-card.completed::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; position: absolute; font-size: 12px; bottom: 6px; right: 8px; }
+    
+    /* COMPLETED BADGE STYLE */
+    .level-card.completed { background: #eafff0; border-color: #2ecc71; color: #2ecc71; position: relative; }
+    .completed-badge {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%) rotate(-15deg);
+        background: #2ecc71; color: white;
+        padding: 4px 8px; border-radius: 6px;
+        font-size: 10px; font-weight: 900;
+        text-transform: uppercase;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        pointer-events: none;
+    }
 
     /* Quiz */
     .quiz-question { font-size: 22px; text-align: center; margin: 0 0 30px 0; font-weight: 600; }
     .option-btn { background: white; color: #555; border: 2px solid #eee; margin-top: 12px; padding: 15px; font-weight: 500; text-align: left; }
 
+    /* CUSTOM DIALOG STYLE */
+    .dialog-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(4px); animation: fadeIn 0.2s; }
+    .dialog-box { background: white; width: 80%; max-width: 300px; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .dialog-icon { font-size: 40px; margin-bottom: 15px; display: block; }
+    .dialog-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #333; }
+    .dialog-msg { color: #666; margin-bottom: 20px; font-size: 15px; }
+    .dialog-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
+
     /* Loader */
     .loader-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(2px); }
     .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
 
 <div class="app-container">
     <div id="loader" class="loader-overlay"><div class="spinner"></div></div>
+
+    <div id="custom-dialog" class="dialog-overlay">
+        <div class="dialog-box">
+            <span id="dialog-icon" class="dialog-icon">🎉</span>
+            <div id="dialog-title" class="dialog-title">Title</div>
+            <div id="dialog-msg" class="dialog-msg">Message goes here</div>
+            <button class="dialog-btn" onclick="closeDialog()">OK</button>
+        </div>
+    </div>
 
     <div id="login-screen" class="screen active">
         <div class="auth-box">
@@ -97,28 +128,47 @@
 </div>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbytYCxHssnHE1fKPcA1rUxIIFJlYXTED3O6nrT-9A1SXbq4iidpOWDWSqCMC2O-W6hb/exec'; // <--- PASTE SAME URL
+    const API_URL = 'https://script.google.com/macros/s/AKfycbytYCxHssnHE1fKPcA1rUxIIFJlYXTED3O6nrT-9A1SXbq4iidpOWDWSqCMC2O-W6hb/exec'; 
 
     let currentUser = null;
     let gameConfig = [];
     let currentLevelId = 0;
+    let dialogCallback = null; // To handle actions after dialog closes
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
+    
     function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+
+    // --- NEW DIALOG FUNCTIONS ---
+    function showDialog(title, msg, icon = 'ℹ️', callback = null) {
+        document.getElementById('dialog-title').innerText = title;
+        document.getElementById('dialog-msg').innerText = msg;
+        document.getElementById('dialog-icon').innerText = icon;
+        document.getElementById('custom-dialog').style.display = 'flex';
+        dialogCallback = callback;
+    }
+
+    function closeDialog() {
+        document.getElementById('custom-dialog').style.display = 'none';
+        if (dialogCallback) {
+            dialogCallback();
+            dialogCallback = null;
+        }
+    }
 
     function login() {
         const email = document.getElementById('login-email').value;
-        if(!email) return alert("Please enter email");
+        if(!email) return showDialog("Error", "Please enter your email", "⚠️");
         toggleLoader(true);
         fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email }) })
         .then(r => r.json()).then(data => {
             toggleLoader(false);
             if(data.status === 'success') { currentUser = data.user; gameConfig = data.gameConfig; initHome(); } 
-            else alert(data.message);
-        }).catch(() => { toggleLoader(false); alert("Connection failed"); });
+            else showDialog("Login Failed", data.message, "❌");
+        }).catch(() => { toggleLoader(false); showDialog("Error", "Connection failed", "📡"); });
     }
 
     function register() {
@@ -127,7 +177,7 @@
         fetch(API_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(resp => {
             toggleLoader(false);
             if(resp.status === 'success') { currentUser = resp.user; gameConfig = resp.gameConfig; initHome(); } 
-            else alert(resp.message);
+            else showDialog("Error", resp.message, "⚠️");
         });
     }
 
@@ -141,11 +191,24 @@
             const config = gameConfig[i] || { isActive: false };
             const userLevelData = currentUser.levels[levelNum];
             const isCompleted = userLevelData && userLevelData.status === 'completed';
+            
             const card = document.createElement('div');
-            card.className = 'level-card'; card.innerText = levelNum;
-            if (isCompleted) { card.classList.add('completed'); card.onclick = () => alert(`Level ${levelNum} Score: ${userLevelData.score}`); } 
-            else if (config.isActive) { card.classList.add('open'); card.onclick = () => preloadLevel(levelNum); } 
-            else { card.classList.add('locked'); }
+            card.className = 'level-card'; 
+            card.innerText = levelNum;
+            
+            if (isCompleted) { 
+                card.classList.add('completed'); 
+                // Add the Badge in the middle
+                card.innerHTML += `<div class="completed-badge">COMPLETE</div>`;
+                card.onclick = () => showDialog("Completed!", `You scored: ${userLevelData.score} points on Level ${levelNum}`, "🏆"); 
+            } 
+            else if (config.isActive) { 
+                card.classList.add('open'); 
+                card.onclick = () => preloadLevel(levelNum); 
+            } 
+            else { 
+                card.classList.add('locked'); 
+            }
             grid.appendChild(card);
         }
         showScreen('home-screen');
@@ -169,15 +232,19 @@
     function handleAnswer(selectedIdx, btnElement) {
         const allBtns = document.querySelectorAll('.option-btn'); allBtns.forEach(b => { b.disabled = true; b.style.opacity = 0.5; });
         btnElement.style.opacity = 1; btnElement.innerText += " (Checking...)";
+        
         fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'finish', selectedOption: selectedIdx }) })
         .then(r => r.json()).then(d => {
             currentUser.totalScore = d.totalScore; currentUser.levels = d.levels;
             if(d.isCorrect) {
-                btnElement.style.background = '#2ecc71'; btnElement.style.color = 'white'; confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                setTimeout(() => { alert("Correct! +7 Points"); initHome(); }, 500);
+                btnElement.style.background = '#2ecc71'; btnElement.style.color = 'white'; 
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                // Use new Dialog instead of alert
+                showDialog("Correct!", "+7 Points added!", "🎉", () => initHome());
             } else {
                 btnElement.style.background = '#e74c3c'; btnElement.style.color = 'white';
-                setTimeout(() => { alert("Wrong answer. +4 Points"); initHome(); }, 500);
+                // Use new Dialog instead of alert
+                showDialog("Wrong Answer", "+4 Points added.", "😔", () => initHome());
             }
         });
     }
