@@ -7,167 +7,41 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
-    /* --- CSS VARIABLES & RESET --- */
-    :root { 
-        --primary: #6C63FF; 
-        --secondary: #FF6584; 
-        --bg: #F3F5F9; 
-        --surface: #ffffff; 
-        --text: #2D3436; 
-    }
-    
-    body { 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-        background: var(--bg); 
-        margin: 0; 
-        padding: 0; 
-        display: flex; 
-        justify-content: center; /* Centers the phone frame horizontally */
-        align-items: center;     /* Centers the phone frame vertically */
-        min-height: 100vh; 
-        overflow-x: hidden; 
-        color: var(--text);
-        -webkit-tap-highlight-color: transparent; 
-    }
-    
-    /* --- PHONE FRAME CONTAINER --- */
-    .app-container { 
-        width: 100%; 
-        max-width: 480px; /* Mobile width constraint */
-        background: var(--surface); 
-        height: 100vh; /* Full height */
-        max-height: 100vh; /* Prevent scrolling outside container */
-        position: relative; 
-        box-shadow: 0 0 40px rgba(0,0,0,0.1); 
-        display: flex; 
-        flex-direction: column; 
-        overflow: hidden; /* Hide scrollbars */
-    }
-
-    /* --- SCREENS --- */
-    .screen { 
-        display: none; 
-        padding: 25px; 
-        flex-grow: 1; 
-        flex-direction: column; 
-        justify-content: center; /* Centers content inside the screen */
-        overflow-y: auto; 
-        animation: fadeIn 0.3s ease; 
-    }
+    :root { --primary: #6C63FF; --bg: #F3F5F9; --surface: #ffffff; --text: #2D3436; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text); -webkit-tap-highlight-color: transparent; }
+    .app-container { width: 100%; max-width: 480px; background: var(--surface); height: 100vh; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+    .screen { display: none; padding: 25px; flex-grow: 1; flex-direction: column; justify-content: center; overflow-y: auto; animation: fadeIn 0.3s ease; }
     .screen.active { display: flex; }
-    
-    /* Home screen shouldn't be centered vertically, it flows top-down */
     #home-screen { justify-content: flex-start; padding: 0; }
-
-    /* --- AUTH STYLES --- */
+    
+    /* Auth */
     .auth-box { text-align: center; width: 100%; }
-    .auth-box h1 { margin-bottom: 30px; color: var(--primary); }
-    
-    input { 
-        width: 100%; padding: 16px; margin: 8px 0; 
-        border: 2px solid #f0f0f0; border-radius: 12px; 
-        font-size: 16px; outline: none; transition: 0.3s; 
-        box-sizing: border-box; 
-    }
+    input { width: 100%; padding: 16px; margin: 8px 0; border: 2px solid #f0f0f0; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box; }
     input:focus { border-color: var(--primary); background: #fdfdff; }
-    
-    button { 
-        width: 100%; padding: 16px; margin-top: 20px; 
-        background: var(--primary); color: white; 
-        border: none; border-radius: 12px; 
-        font-size: 16px; font-weight: bold; cursor: pointer; 
-        transition: transform 0.1s, opacity 0.2s; 
-    }
+    button { width: 100%; padding: 16px; margin-top: 20px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
     button:active { transform: scale(0.98); }
-    button:disabled { opacity: 0.6; cursor: wait; }
+    .secondary-btn { background: transparent; color: var(--primary); border: 2px solid var(--primary); margin-top: 10px; }
     
-    .secondary-btn { 
-        background: transparent; color: var(--primary); 
-        border: 2px solid var(--primary); margin-top: 10px; 
-    }
+    /* Header */
+    .header { background: linear-gradient(135deg, var(--primary), #8e86ff); color: white; padding: 25px; border-radius: 0 0 30px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2); }
+    .score-badge { background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; font-weight: bold; display: flex; gap: 8px; align-items: center; }
 
-    /* --- HOME HEADER --- */
-    .header { 
-        background: linear-gradient(135deg, var(--primary), #8e86ff); 
-        color: white; padding: 25px; 
-        border-radius: 0 0 30px 30px; 
-        display: flex; justify-content: space-between; align-items: center; 
-        box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2); 
-        margin-bottom: 10px;
-    }
-    .score-badge { 
-        background: rgba(255,255,255,0.2); 
-        padding: 8px 15px; border-radius: 20px; 
-        font-weight: bold; display: flex; gap: 8px; align-items: center; 
-    }
-
-    /* --- LEVEL GRID --- */
-    .level-grid { 
-        display: grid; grid-template-columns: repeat(4, 1fr); 
-        gap: 12px; padding: 20px; padding-bottom: 80px; /* Space for scroll */
-    }
-    .level-card { 
-        aspect-ratio: 1; background: white; border-radius: 18px; 
-        display: flex; justify-content: center; align-items: center; 
-        font-size: 20px; font-weight: 700; color: var(--text);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative;
-        transition: 0.2s; border: 2px solid transparent; 
-    }
-    
+    /* Grid */
+    .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; padding-bottom: 80px; }
+    .level-card { aspect-ratio: 1; background: white; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent; }
     .level-card.open { cursor: pointer; border-color: #e0e0ff; color: var(--primary); }
-    .level-card.open:active { transform: scale(0.95); }
-    
     .level-card.locked { opacity: 0.4; background: #eee; pointer-events: none; }
-    .level-card.locked::after { 
-        content: '\f023'; font-family: "Font Awesome 6 Free"; 
-        position: absolute; font-size: 12px; color: #666; bottom: 8px; 
-    }
-    
-    .level-card.completed { 
-        background: #eafff0; border-color: #2ecc71; color: #2ecc71; opacity: 1; 
-    }
-    .level-card.completed::after { 
-        content: '\f00c'; font-family: "Font Awesome 6 Free"; 
-        position: absolute; font-size: 12px; bottom: 6px; right: 8px; 
-    }
+    .level-card.locked::after { content: '\f023'; font-family: "Font Awesome 6 Free"; position: absolute; font-size: 12px; color: #666; bottom: 8px; }
+    .level-card.completed { background: #eafff0; border-color: #2ecc71; color: #2ecc71; }
+    .level-card.completed::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; position: absolute; font-size: 12px; bottom: 6px; right: 8px; }
 
-    /* --- QUIZ --- */
-    .quiz-question { 
-        font-size: 22px; text-align: center; 
-        margin: 0 0 30px 0; color: #333; font-weight: 600; line-height: 1.4; 
-    }
-    .option-btn { 
-        background: white; color: #555; border: 2px solid #eee; 
-        margin-top: 12px; padding: 15px; font-weight: 500; text-align: left;
-    }
-    .option-btn:hover { background: #f9f9f9; }
+    /* Quiz */
+    .quiz-question { font-size: 22px; text-align: center; margin: 0 0 30px 0; font-weight: 600; }
+    .option-btn { background: white; color: #555; border: 2px solid #eee; margin-top: 12px; padding: 15px; font-weight: 500; text-align: left; }
 
-    /* --- ADMIN --- */
-    .fab { 
-        position: absolute; bottom: 20px; right: 20px; 
-        width: 50px; height: 50px; background: #333; color: white; 
-        border-radius: 50%; display: flex; justify-content: center; 
-        align-items: center; cursor: pointer; opacity: 0.2; z-index: 10; 
-    }
-    .admin-row { 
-        background: white; padding: 15px; margin-bottom: 10px; 
-        border-radius: 12px; border: 1px solid #eee; 
-    }
-    .admin-row input { padding: 8px; margin: 4px 0; font-size: 14px; }
-
-    /* --- LOADER OVERLAY --- */
-    .loader-overlay { 
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-        background: rgba(255,255,255,0.8); display: none; 
-        justify-content: center; align-items: center; z-index: 100; 
-        backdrop-filter: blur(2px); 
-    }
-    .spinner { 
-        width: 40px; height: 40px; border: 4px solid #eee; 
-        border-top: 4px solid var(--primary); border-radius: 50%; 
-        animation: spin 0.8s linear infinite; 
-    }
-
+    /* Loader */
+    .loader-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(2px); }
+    .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -175,7 +49,6 @@
 <body>
 
 <div class="app-container">
-    
     <div id="loader" class="loader-overlay"><div class="spinner"></div></div>
 
     <div id="login-screen" class="screen active">
@@ -185,7 +58,6 @@
             <button onclick="login()">Start Playing</button>
             <button class="secondary-btn" onclick="showScreen('register-screen')">Create Account</button>
         </div>
-        <div class="fab" onclick="showAdminLogin()"><i class="fas fa-cog"></i></div>
     </div>
 
     <div id="register-screen" class="screen">
@@ -201,14 +73,8 @@
 
     <div id="home-screen" class="screen">
         <div class="header">
-            <div>
-                <div style="font-size: 13px; opacity: 0.9;">Welcome,</div>
-                <div id="display-name" style="font-size: 20px; font-weight: 700;">Player</div>
-            </div>
-            <div class="score-badge">
-                <i class="fas fa-star" style="color: #ffd700"></i>
-                <span id="display-score">0</span>
-            </div>
+            <div><div style="font-size: 13px; opacity: 0.9;">Welcome,</div><div id="display-name" style="font-size: 20px; font-weight: 700;">Player</div></div>
+            <div class="score-badge"><i class="fas fa-star" style="color: #ffd700"></i><span id="display-score">0</span></div>
         </div>
         <div class="level-grid" id="level-grid"></div>
         <button onclick="logout()" class="secondary-btn" style="width: 90%; margin: 0 auto 20px auto;">Logout</button>
@@ -228,250 +94,95 @@
         <div class="quiz-question" id="q-text">Loading...</div>
         <div id="q-options" style="width: 100%;"></div>
     </div>
-
-    <div id="admin-screen" class="screen" style="background: #f4f4f4; justify-content: flex-start; padding: 10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
-            <h2 style="margin:0">Admin Panel</h2>
-            <button style="width:auto; margin:0; padding:8px 15px;" onclick="saveAdminData()">Save All</button>
-        </div>
-        <div id="admin-list"></div>
-        <button class="secondary-btn" onclick="logout()">Exit Admin</button>
-    </div>
-
 </div>
 
 <script>
-    // --- CONFIGURATION ---
-    const API_URL = 'https://script.google.com/macros/s/AKfycbytYCxHssnHE1fKPcA1rUxIIFJlYXTED3O6nrT-9A1SXbq4iidpOWDWSqCMC2O-W6hb/exec'; // <--- PASTE HERE
+    const API_URL = 'https://script.google.com/macros/s/AKfycbytYCxHssnHE1fKPcA1rUxIIFJlYXTED3O6nrT-9A1SXbq4iidpOWDWSqCMC2O-W6hb/exec'; // <--- PASTE SAME URL
 
-    // --- STATE ---
     let currentUser = null;
     let gameConfig = [];
     let currentLevelId = 0;
-    let adminPass = '';
 
-    // --- UI HELPERS ---
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
+    function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
 
-    function toggleLoader(show) {
-        document.getElementById('loader').style.display = show ? 'flex' : 'none';
-    }
-
-    // --- AUTHENTICATION ---
     function login() {
         const email = document.getElementById('login-email').value;
         if(!email) return alert("Please enter email");
-        
         toggleLoader(true);
         fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email }) })
-        .then(r => r.json())
-        .then(data => {
+        .then(r => r.json()).then(data => {
             toggleLoader(false);
-            if(data.status === 'success') {
-                currentUser = data.user;
-                gameConfig = data.gameConfig;
-                initHome();
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(() => { toggleLoader(false); alert("Connection failed"); });
+            if(data.status === 'success') { currentUser = data.user; gameConfig = data.gameConfig; initHome(); } 
+            else alert(data.message);
+        }).catch(() => { toggleLoader(false); alert("Connection failed"); });
     }
 
     function register() {
         toggleLoader(true);
-        const data = {
-            action: 'register',
-            name: document.getElementById('reg-name').value,
-            phone: document.getElementById('reg-phone').value,
-            email: document.getElementById('reg-email').value
-        };
-        fetch(API_URL, { method: 'POST', body: JSON.stringify(data) })
-        .then(r => r.json())
-        .then(resp => {
+        const data = { action: 'register', name: document.getElementById('reg-name').value, phone: document.getElementById('reg-phone').value, email: document.getElementById('reg-email').value };
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(resp => {
             toggleLoader(false);
-            if(resp.status === 'success') {
-                currentUser = resp.user;
-                gameConfig = resp.gameConfig;
-                initHome();
-            } else alert(resp.message);
+            if(resp.status === 'success') { currentUser = resp.user; gameConfig = resp.gameConfig; initHome(); } 
+            else alert(resp.message);
         });
     }
 
-    // --- HOME & GAMEPLAY ---
     function initHome() {
         document.getElementById('display-name').innerText = currentUser.name;
         document.getElementById('display-score').innerText = currentUser.totalScore;
         const grid = document.getElementById('level-grid');
         grid.innerHTML = '';
-
         for(let i=0; i<20; i++) {
             const levelNum = i + 1;
             const config = gameConfig[i] || { isActive: false };
             const userLevelData = currentUser.levels[levelNum];
             const isCompleted = userLevelData && userLevelData.status === 'completed';
-
             const card = document.createElement('div');
-            card.className = 'level-card';
-            card.innerText = levelNum;
-
-            if (isCompleted) {
-                card.classList.add('completed');
-                card.onclick = () => alert(`Level ${levelNum} Completed!\nScore: ${userLevelData.score}`);
-            } else if (config.isActive) {
-                card.classList.add('open');
-                card.onclick = () => preloadLevel(levelNum);
-            } else {
-                card.classList.add('locked');
-            }
+            card.className = 'level-card'; card.innerText = levelNum;
+            if (isCompleted) { card.classList.add('completed'); card.onclick = () => alert(`Level ${levelNum} Score: ${userLevelData.score}`); } 
+            else if (config.isActive) { card.classList.add('open'); card.onclick = () => preloadLevel(levelNum); } 
+            else { card.classList.add('locked'); }
             grid.appendChild(card);
         }
         showScreen('home-screen');
     }
 
-    function preloadLevel(id) {
-        currentLevelId = id;
-        document.getElementById('level-title').innerText = `Level ${id}`;
-        showScreen('start-screen');
-    }
+    function preloadLevel(id) { currentLevelId = id; document.getElementById('level-title').innerText = `Level ${id}`; showScreen('start-screen'); }
 
-    // --- OPTIMISTIC GAME LOGIC (NO LAG) ---
     function instantStartLevel() {
-        // 1. Update Local State Instantly
-        if (!currentUser.levels[currentLevelId]) {
-            currentUser.levels[currentLevelId] = { status: 'started', score: 3 };
-            currentUser.totalScore += 3;
-        }
-        
-        // 2. Render Quiz Instantly
+        if (!currentUser.levels[currentLevelId]) { currentUser.levels[currentLevelId] = { status: 'started', score: 3 }; currentUser.totalScore += 3; }
         const qData = gameConfig[currentLevelId - 1];
         document.getElementById('q-text').innerText = qData.question;
-        const optContainer = document.getElementById('q-options');
-        optContainer.innerHTML = '';
-        
+        const optContainer = document.getElementById('q-options'); optContainer.innerHTML = '';
         qData.options.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            // Handle click
-            btn.onclick = () => handleAnswer(idx + 1, btn);
-            optContainer.appendChild(btn);
+            const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt;
+            btn.onclick = () => handleAnswer(idx + 1, btn); optContainer.appendChild(btn);
         });
         showScreen('quiz-screen');
-
-        // 3. Sync Background
-        fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'start' })
-        });
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'start' }) });
     }
 
     function handleAnswer(selectedIdx, btnElement) {
-        // Disable all buttons to prevent double click
-        const allBtns = document.querySelectorAll('.option-btn');
-        allBtns.forEach(b => { b.disabled = true; b.style.opacity = 0.5; });
-        btnElement.style.opacity = 1;
-        btnElement.innerText += " (Checking...)";
-
-        // Check Server
-        fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ 
-                action: 'updateScore', 
-                email: currentUser.email, 
-                levelId: currentLevelId, 
-                stage: 'finish',
-                selectedOption: selectedIdx 
-            })
-        })
-        .then(r => r.json())
-        .then(d => {
-            currentUser.totalScore = d.totalScore;
-            currentUser.levels = d.levels;
-            
+        const allBtns = document.querySelectorAll('.option-btn'); allBtns.forEach(b => { b.disabled = true; b.style.opacity = 0.5; });
+        btnElement.style.opacity = 1; btnElement.innerText += " (Checking...)";
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'finish', selectedOption: selectedIdx }) })
+        .then(r => r.json()).then(d => {
+            currentUser.totalScore = d.totalScore; currentUser.levels = d.levels;
             if(d.isCorrect) {
-                btnElement.style.background = '#2ecc71'; // Green
-                btnElement.style.color = 'white';
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                setTimeout(() => {
-                    alert("Correct! +7 Points");
-                    initHome();
-                }, 500);
+                btnElement.style.background = '#2ecc71'; btnElement.style.color = 'white'; confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                setTimeout(() => { alert("Correct! +7 Points"); initHome(); }, 500);
             } else {
-                btnElement.style.background = '#e74c3c'; // Red
-                btnElement.style.color = 'white';
-                setTimeout(() => {
-                    alert("Wrong answer. +4 Points");
-                    initHome();
-                }, 500);
+                btnElement.style.background = '#e74c3c'; btnElement.style.color = 'white';
+                setTimeout(() => { alert("Wrong answer. +4 Points"); initHome(); }, 500);
             }
         });
     }
 
-    function logout() {
-        currentUser = null;
-        showScreen('login-screen');
-    }
-
-    // --- ADMIN PANEL ---
-    function showAdminLogin() {
-        const pass = prompt("Admin Password:");
-        if(!pass) return;
-        toggleLoader(true);
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminLoad', pass }) })
-        .then(r => r.json())
-        .then(d => {
-            toggleLoader(false);
-            if(d.status === 'success') {
-                renderAdmin(d.data);
-                adminPass = pass;
-                showScreen('admin-screen');
-            } else alert("Wrong password");
-        });
-    }
-
-    function renderAdmin(data) {
-        const list = document.getElementById('admin-list');
-        list.innerHTML = '';
-        data.forEach((row, i) => {
-            list.innerHTML += `
-            <div class="admin-row">
-                <b>Level ${row[0]}</b>
-                <input id="q-${i}" value="${row[1]}" placeholder="Question">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px">
-                    <input id="o1-${i}" value="${row[2]}"> <input id="o2-${i}" value="${row[3]}">
-                    <input id="o3-${i}" value="${row[4]}"> <input id="o4-${i}" value="${row[5]}">
-                </div>
-                <div style="margin-top:5px; display:flex; justify-content:space-between;">
-                    <label>Correct (1-4): <input type="number" id="c-${i}" value="${row[6]}" style="width:40px"></label>
-                    <label>Open: <input type="checkbox" id="a-${i}" ${row[7]?'checked':''}></label>
-                </div>
-            </div>`;
-        });
-    }
-
-    function saveAdminData() {
-        toggleLoader(true);
-        const rows = [];
-        for(let i=0; i<20; i++) {
-            rows.push([
-                i+1,
-                document.getElementById(`q-${i}`).value,
-                document.getElementById(`o1-${i}`).value,
-                document.getElementById(`o2-${i}`).value,
-                document.getElementById(`o3-${i}`).value,
-                document.getElementById(`o4-${i}`).value,
-                document.getElementById(`c-${i}`).value,
-                document.getElementById(`a-${i}`).checked
-            ]);
-        }
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminSave', pass: adminPass, rows }) })
-        .then(r => r.json())
-        .then(d => { toggleLoader(false); alert("Saved successfully!"); });
-    }
+    function logout() { currentUser = null; showScreen('login-screen'); }
 </script>
 </body>
 </html>
