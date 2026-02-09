@@ -7,80 +7,214 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
-    /* Updated Color Palette based on the image */
     :root { 
-        --primary: #0056b3; /* Dark blue from the right side of the gradient */
-        --bg-light: #cce5ff; /* Light blue from the left side */
-        --bg-dark: #004a99;  /* A slightly darker blue for gradients */
+        --primary: #0056b3; 
+        --bg-light: #cce5ff; 
+        --bg-dark: #004a99;  
         --surface: #ffffff; 
         --text: #2D3436;
-        --text-light: #ffffff; /* White text for dark backgrounds */
+        --success: #2ecc71;
     }
     body { 
         font-family: 'Segoe UI', sans-serif; 
-        /* New blue gradient background */
+        /* Restored Gradient Background */
         background: linear-gradient(to right, var(--bg-light), var(--primary)); 
-        margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text); -webkit-tap-highlight-color: transparent; 
+        margin: 0; padding: 10px; 
+        display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text); -webkit-tap-highlight-color: transparent; 
+        box-sizing: border-box;
     }
-    .app-container { width: 100%; max-width: 480px; background: var(--surface); height: 100vh; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+    
+    .app-container { 
+        width: 100%; max-width: 440px; /* Mobile width constraint */
+        background: var(--surface); 
+        height: 98vh; min-height: 580px;
+        position: relative; 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2); /* Restored Shadow */
+        display: flex; flex-direction: column; overflow: hidden; 
+        border-radius: 25px; /* Restored Rounded Corners */
+    }
+
     .screen { display: none; padding: 25px; flex-grow: 1; flex-direction: column; justify-content: center; overflow-y: auto; animation: fadeIn 0.3s ease; }
     .screen.active { display: flex; }
     #home-screen { justify-content: flex-start; padding: 0; }
     
-    /* Auth Styling */
+    /* Typography & Buttons */
     .auth-box { text-align: center; width: 100%; }
-    /* Title and paragraph text on auth screens to white for contrast */
     .auth-box h1, .auth-box p { color: var(--text); }
-    #login-screen .auth-box h1, #login-screen .auth-box p,
-    #register-screen .auth-box h1, #register-screen .auth-box p,
-    #start-screen .auth-box h1, #start-screen .auth-box p {
-        color: var(--text);
-    }
-
+    
     input { width: 100%; padding: 16px; margin: 8px 0; border: 2px solid #f0f0f0; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box; }
     input:focus { border-color: var(--primary); background: #fdfdff; }
-    input:read-only { background-color: #f8f8f8; color: #888; cursor: not-allowed; }
-    button { width: 100%; padding: 16px; margin-top: 20px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+    button { width: 100%; padding: 16px; margin-top: 20px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
     button:active { transform: scale(0.98); }
+    button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.7; }
+    
     .secondary-btn { background: transparent; color: var(--primary); border: 2px solid var(--primary); margin-top: 10px; }
-    
-    /* Header & Score */
+
+    /* Header */
     .header { 
-        /* Updated header gradient */
         background: linear-gradient(135deg, var(--primary), var(--bg-dark)); 
-        color: white; padding: 25px; border-radius: 0 0 30px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(0, 86, 179, 0.2); 
+        color: white; padding: 20px 25px; 
+        border-radius: 0 0 30px 30px; 
+        display: flex; justify-content: space-between; align-items: center; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        position: relative; z-index: 10;
+        height: 70px;
     }
-    .score-badge { background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; font-weight: bold; display: flex; gap: 8px; align-items: center; }
 
-    /* Level Grid */
-    .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; padding-bottom: 80px; }
-    .level-card { aspect-ratio: 1; background: white; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent; overflow: hidden; }
-    .level-card.open { cursor: pointer; border-color: var(--bg-light); color: var(--primary); }
-    .level-card.locked { opacity: 0.4; background: #eee; pointer-events: none; }
-    .level-card.locked::after { content: '\f023'; font-family: "Font Awesome 6 Free"; position: absolute; font-size: 12px; color: var(--primary); bottom: 8px; }
-    
-    .level-card.completed { background: #eafff0; border-color: #2ecc71; color: #2ecc71; position: relative; }
-    .completed-badge {
+    /* Header Logo */
+    .header-logo {
         position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%) rotate(-15deg);
-        background: #2ecc71; color: white;
-        padding: 4px 8px; border-radius: 6px;
-        font-size: 10px; font-weight: 900;
-        text-transform: uppercase;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        height: 15px; /* Adjusted size for mobile header */
+        width: auto;
+        object-fit: contain;
+    }
+    
+    /* Score Dropdown */
+    .score-container { position: relative; cursor: pointer; z-index: 12; }
+    .score-badge { background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; font-weight: bold; display: flex; gap: 8px; align-items: center; }
+    .score-dropdown-menu {
+        position: absolute; top: 110%; right: 0;
+        background: white; color: var(--text);
+        width: 180px; padding: 10px;
+        border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        display: none; animation: popIn 0.2s;
+    }
+    .score-dropdown-menu.show { display: block; }
+    .score-item { padding: 8px; border-bottom: 1px solid #eee; font-size: 13px; display: flex; justify-content: space-between; }
+    .score-item:last-child { border-bottom: none; }
+    .score-item span { font-weight: bold; color: var(--primary); }
+
+    /* Levels */
+    .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; padding-bottom: 80px; }
+    .level-card { aspect-ratio: 1; background: #f8f9fa; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent; overflow: hidden; transition: transform 0.1s; }
+    .level-card.open { cursor: pointer; border-color: #e0e0e0; color: var(--primary); background: white; }
+    .level-card.open:active { transform: scale(0.95); }
+    .level-card.locked { opacity: 0.5; background: #eee; pointer-events: none; }
+    .level-card.completed { background: #eafff0; border-color: #2ecc71; color: #2ecc71; }
+    .completed-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); background: #2ecc71; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; pointer-events: none; }
+
+    /* Start Screen Elements */
+    .timer-badge {
+        position: absolute; top: 20px; right: 20px;
+        background: #ff4757; color: white;
+        width: 50px; height: 50px;
+        border-radius: 50%;
+        display: flex; justify-content: center; align-items: center;
+        font-weight: bold; font-size: 18px;
+        box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+    }
+    .content-box { 
+        background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0; 
+        border: 2px dashed #ccd; min-height: 120px; display: flex; 
+        flex-direction: column; justify-content: center; align-items: center;
+        text-align: center;
+        overflow: hidden; 
+    }
+    .video-frame {
+        width: 100%; height: 200px; border-radius: 10px; border: none; background: black;
+    }
+    .content-icon { font-size: 40px; margin-bottom: 10px; color: var(--primary); }
+    .clickable-pdf { cursor: pointer; transition: transform 0.2s; }
+    .clickable-pdf:hover { transform: scale(1.1); }
+    
+    /* ---------------- MINI GAME STYLES ---------------- */
+    
+    /* Memory Game */
+    .memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin: 20px 0; }
+    .memory-card {
+        background: var(--primary); aspect-ratio: 1; border-radius: 10px;
+        cursor: pointer; position: relative; transform-style: preserve-3d; transition: transform 0.4s;
+    }
+    .memory-card.flipped { transform: rotateY(180deg); background: white; border: 2px solid var(--primary); }
+    .memory-card-front, .memory-card-back {
+        position: absolute; width: 100%; height: 100%; 
+        backface-visibility: hidden; display: flex; justify-content: center; align-items: center;
+        border-radius: 10px; overflow: hidden;
+    }
+    .memory-card-back { transform: rotateY(180deg); padding: 5px; box-sizing: border-box; }
+    .memory-card-back img { width: 100%; height: 100%; object-fit: contain; }
+
+    /* Puzzle Game (Responsive) */
+    .puzzle-area { margin-top: 10px; width: 100%; }
+    
+    .puzzle-grid { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        grid-template-rows: 1fr 1fr;
+        gap: 0; 
+        width: 100%; max-width: 320px; 
+        aspect-ratio: 1 / 1; 
+        margin: 0 auto; 
+        position: relative;
+        background: transparent;
+        border: none;
+    }
+    
+    .puzzle-slot { 
+        background: rgba(255, 255, 255, 0.4); 
+        border: 2px dashed rgba(0,0,0,0.2);
+        display: flex; justify-content: center; align-items: center; 
+        position: relative;
+        overflow: visible; 
+        z-index: 1;
+        border-radius: 8px;
+        margin: 2px;
+    }
+    
+    .puzzle-slot.filled { 
+        border: none; background: transparent; margin: 0; border-radius: 0; 
+    }
+    
+    /* Specific Image Positioning */
+    .puzzle-filled-img {
+        position: absolute;
+        z-index: 10;
         pointer-events: none;
+        filter: drop-shadow(0 0 2px rgba(0,0,0,0.1));
+    }
+    
+    /* Slot 1: Top Left */
+    .puzzle-slot[data-expected="1"] .puzzle-filled-img {
+        width: 129.2%; height: 101.1%; top: 0; left: 0;
+    }
+    /* Slot 2: Top Right */
+    .puzzle-slot[data-expected="2"] .puzzle-filled-img {
+        width: 101.1%; height: 129.2%; top: 0; right: 0;
+    }
+    /* Slot 3: Bottom Left */
+    .puzzle-slot[data-expected="3"] .puzzle-filled-img {
+        width: 101.1%; height: 129.2%; bottom: 0; left: 0;
+    }
+    /* Slot 4: Bottom Right */
+    .puzzle-slot[data-expected="4"] .puzzle-filled-img {
+        width: 129.2%; height: 101.1%; bottom: 0; right: 0;
     }
 
-    /* Dialogs & Loaders */
-    .dialog-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(4px); animation: fadeIn 0.2s; }
-    .dialog-box { background: white; width: 80%; max-width: 300px; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .dialog-icon { font-size: 40px; margin-bottom: 15px; display: block; color: var(--primary); }
-    .dialog-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
+    .puzzle-pieces-container {
+        display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+        margin-top: 20px; min-height: 80px; padding: 10px;
+        background: #f0f4f8; border-radius: 10px;
+    }
+    
+    .puzzle-piece {
+        width: 60px; height: 60px;
+        cursor: grab;
+        background-size: cover; background-position: center;
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+        position: relative;
+    }
 
+    /* -------------------------------------------------- */
+
+    /* Dialogs */
+    .dialog-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(4px); }
+    .dialog-box { background: white; width: 80%; max-width: 300px; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: popIn 0.3s; }
     .loader-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(2px); }
     .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    
+
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -93,7 +227,7 @@
 
     <div id="custom-dialog" class="dialog-overlay">
         <div class="dialog-box">
-            <span id="dialog-icon" class="dialog-icon">🎉</span>
+            <span id="dialog-icon" class="dialog-icon" style="font-size: 40px; display:block; margin-bottom:10px;">🎉</span>
             <div id="dialog-title" style="font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #333;">Title</div>
             <div id="dialog-msg" style="color: #666; margin-bottom: 20px; font-size: 15px;">Message</div>
             <button class="dialog-btn" onclick="closeDialog()">OK</button>
@@ -102,8 +236,8 @@
 
     <div id="login-screen" class="screen active">
         <div class="auth-box">
-            <h1 style="margin-bottom: 10px;">🎮 Game App</h1>
-            <p style="margin-bottom: 25px;">Enter email to start</p>
+            <h1>🎮 Sensodyne Ramadan Riddles</h1>
+            <p>Login to continue</p>
             <input type="email" id="login-email" placeholder="Email Address">
             <button onclick="login()">Start Playing</button>
         </div>
@@ -112,7 +246,6 @@
     <div id="register-screen" class="screen">
         <div class="auth-box">
             <h1>New Player</h1>
-            <p style="font-size: 14px; margin-bottom: 15px;">Complete your profile to join the game!</p>
             <input type="text" id="reg-name" placeholder="Full Name">
             <input type="tel" id="reg-phone" placeholder="Phone Number">
             <input type="email" id="reg-email" placeholder="Email" readonly>
@@ -123,19 +256,57 @@
 
     <div id="home-screen" class="screen">
         <div class="header">
-            <div><div style="font-size: 13px; opacity: 0.9;">Welcome,</div><div id="display-name" style="font-size: 20px; font-weight: 700;">Player</div></div>
-            <div class="score-badge"><i class="fas fa-star" style="color: #ffd700"></i><span id="display-score">0</span></div>
+            <div style="z-index: 12;">
+                <div style="font-size: 13px; opacity: 0.9;">Welcome,</div>
+                <div id="display-name" style="font-size: 20px; font-weight: 700;">Player</div>
+            </div>
+
+            <img src="Heleon_logo.png" alt="Logo" class="header-logo">
+
+            <div class="score-container" onclick="toggleScoreMenu()">
+                <div class="score-badge"><i class="fas fa-star" style="color: #ffd700"></i><span id="display-score">0</span></div>
+                <div id="score-menu" class="score-dropdown-menu">
+                    <div style="text-align:center; margin-bottom:8px; font-size:11px; color:#888;">REWARDS</div>
+                    <div class="score-item">10 - 50 pts <span>🧢 Cap</span></div>
+                    <div class="score-item">50 - 100 pts <span>🧪 Flask</span></div>
+                    <div class="score-item">100 - 200 pts <span>🎟️ Voucher</span></div>
+                </div>
+            </div>
         </div>
         <div class="level-grid" id="level-grid"></div>
         <button onclick="logout()" class="secondary-btn" style="width: 90%; margin: 20px auto;">Logout</button>
     </div>
 
     <div id="start-screen" class="screen">
+        <div class="timer-badge" id="level-timer">60</div>
         <div class="auth-box">
             <h1 id="level-title">Level X</h1>
-            <div style="font-size: 60px; margin: 30px 0;">🚀</div>
-            <button onclick="instantStartLevel()">Start Game (+3 pts)</button>
-            <button class="secondary-btn" onclick="showScreen('home-screen')">Back</button>
+            <div id="level-content" class="content-box"></div>
+            <div id="instruction-text" style="font-size: 13px; color: #e74c3c; min-height: 20px; margin-bottom: 10px;"></div>
+            <button id="start-level-btn" onclick="startMiniGame()">Start Game (+3 pts)</button>
+            <button class="secondary-btn" onclick="exitLevel()">Back</button>
+        </div>
+    </div>
+
+    <div id="minigame-screen" class="screen">
+        <div class="auth-box">
+            <h2 id="mini-title">Mini Game</h2>
+            <p id="mini-desc" style="font-size:14px; color:#666;"></p>
+            
+            <div id="memory-board" class="memory-grid" style="display:none;"></div>
+            
+            <div id="puzzle-board" class="puzzle-area" style="display:none;">
+                <div class="puzzle-grid" id="puzzle-slots">
+                    <div class="puzzle-slot" data-expected="1"></div>
+                    <div class="puzzle-slot" data-expected="2"></div>
+                    <div class="puzzle-slot" data-expected="3"></div>
+                    <div class="puzzle-slot" data-expected="4"></div>
+                </div>
+                <div style="font-size:12px; margin-top:5px; color:#999">Drag pieces below to the grid</div>
+                <div class="puzzle-pieces-container" id="puzzle-pieces"></div>
+            </div>
+
+            <button id="finish-mini-btn" disabled onclick="finishMiniGame()">Next (+4 pts)</button>
         </div>
     </div>
 
@@ -146,93 +317,86 @@
 </div>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbytYCxHssnHE1fKPcA1rUxIIFJlYXTED3O6nrT-9A1SXbq4iidpOWDWSqCMC2O-W6hb/exec'; 
+    const API_URL = 'https://script.google.com/macros/s/AKfycbye2ATG6lhtQUXfYJ4U_2uRHYT30fGqG7rAj1rMXjcwFjzlPZmpiK_8Z_D007ZHStEU/exec'; 
+
+    const PuzzleAssets = [
+        "1.png", "2.png", "3.png", "4.png"  
+    ];
+
+    const MemoryAssets = [
+        "tooth.png", "broken-tooth.png", "molar.png", "tube.png",
+    ];
 
     let currentUser = null;
-    let gameConfig = [];
+    let gameConfig = []; 
     let currentLevelId = 0;
-    let dialogCallback = null;
-
+    let timerInterval = null;
+    
+    // --- HELPER FUNCTIONS ---
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+        document.getElementById('score-menu').classList.remove('show');
     }
     
     function toggleLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+    function toggleScoreMenu() { document.getElementById('score-menu').classList.toggle('show'); }
 
     function showDialog(title, msg, icon = 'ℹ️', callback = null) {
         document.getElementById('dialog-title').innerText = title;
         document.getElementById('dialog-msg').innerText = msg;
         document.getElementById('dialog-icon').innerText = icon;
         document.getElementById('custom-dialog').style.display = 'flex';
-        dialogCallback = callback;
+        window.dialogCallback = callback;
     }
 
     function closeDialog() {
         document.getElementById('custom-dialog').style.display = 'none';
-        if (dialogCallback) { dialogCallback(); dialogCallback = null; }
+        if (window.dialogCallback) { window.dialogCallback(); window.dialogCallback = null; }
     }
 
-    // --- LOGIC: AUTOMATIC REDIRECT ---
+    function getEmbedUrl(url) {
+        if (!url) return '';
+        if (url.includes('youtube.com/watch?v=')) {
+            const videoId = url.split('v=')[1].split('&')[0];
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`;
+        }
+        if (url.includes('youtu.be/')) {
+            const videoId = url.split('youtu.be/')[1].split('?')[0];
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`;
+        }
+        return url; 
+    }
+
+    // --- AUTH LOGIC ---
     function login() {
         const email = document.getElementById('login-email').value.trim();
-        if(!email) return showDialog("Wait!", "Please enter your email address", "⚠️");
-        
+        if(!email) return showDialog("Wait!", "Enter email", "⚠️");
         toggleLoader(true);
-        fetch(API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: 'login', email }) 
-        })
-        .then(r => r.json())
-        .then(data => {
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email }) })
+        .then(r => r.json()).then(data => {
             toggleLoader(false);
             if(data.status === 'success') { 
                 currentUser = data.user; 
                 gameConfig = data.gameConfig; 
                 initHome(); 
-            } 
-            else if (data.message && (data.message.toLowerCase().includes("not found") || data.message.toLowerCase().includes("not registered"))) {
-                // REDIRECT TO REGISTER
-                document.getElementById('reg-email').value = email;
-                showScreen('register-screen');
-                showDialog("Welcome!", "We didn't find your account. Let's create one!", "👋");
             }
-            else {
-                showDialog("Oops!", data.message, "❌");
-            }
-        })
-        .catch(() => { 
-            toggleLoader(false); 
-            showDialog("Error", "Check your connection", "📡"); 
-        });
+            else if (data.message && data.message.includes("not found")) { document.getElementById('reg-email').value = email; showScreen('register-screen'); }
+            else { showDialog("Oops", data.message, "❌"); }
+        }).catch(() => { toggleLoader(false); showDialog("Error", "Check connection", "📡"); });
     }
 
     function register() {
         const name = document.getElementById('reg-name').value.trim();
         const phone = document.getElementById('reg-phone').value.trim();
         const email = document.getElementById('reg-email').value.trim();
-
-        if(!name || !phone) return showDialog("Missing Info", "Name and Phone are required", "📝");
-
+        if(!name || !phone) return showDialog("Missing", "Name & Phone needed", "📝");
         toggleLoader(true);
-        fetch(API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: 'register', name, phone, email }) 
-        })
-        .then(r => r.json())
-        .then(resp => {
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'register', name, phone, email }) })
+        .then(r => r.json()).then(resp => {
             toggleLoader(false);
-            if(resp.status === 'success') { 
-                currentUser = resp.user; 
-                gameConfig = resp.gameConfig; 
-                initHome(); 
-            } else {
-                showDialog("Error", resp.message, "⚠️");
-            }
-        })
-        .catch(() => {
-            toggleLoader(false);
-            showDialog("Error", "Registration failed", "📡");
+            if(resp.status === 'success') { currentUser = resp.user; gameConfig = resp.gameConfig; initHome(); }
+            else { showDialog("Error", resp.message, "⚠️"); }
         });
     }
 
@@ -241,9 +405,9 @@
         document.getElementById('display-score').innerText = currentUser.totalScore;
         const grid = document.getElementById('level-grid');
         grid.innerHTML = '';
-        for(let i=0; i<20; i++) {
-            const levelNum = i + 1;
-            const config = gameConfig[i] || { isActive: false };
+        
+        gameConfig.forEach((config) => {
+            const levelNum = config.id;
             const userLevelData = currentUser.levels[levelNum];
             const isCompleted = userLevelData && userLevelData.status === 'completed';
             const card = document.createElement('div');
@@ -252,39 +416,257 @@
             
             if (isCompleted) { 
                 card.classList.add('completed'); 
-                card.innerHTML += `<div class="completed-badge">COMPLETE</div>`;
-                card.onclick = () => showDialog("Level " + levelNum, `Completed! Score: ${userLevelData.score}`, "🏆"); 
+                card.innerHTML += `<div class="completed-badge">DONE</div>`; 
+                card.onclick = () => showDialog("Done", `Score: ${userLevelData.score}`, "🏆"); 
             } 
             else if (config.isActive) { 
                 card.classList.add('open'); 
                 card.onclick = () => preloadLevel(levelNum); 
             } 
-            else { card.classList.add('locked'); }
+            else { 
+                card.classList.add('locked'); 
+                card.innerHTML += `<i class="fas fa-lock" style="position:absolute; bottom:8px; font-size:12px;"></i>`; 
+            }
             grid.appendChild(card);
-        }
+        });
         showScreen('home-screen');
     }
 
-    function preloadLevel(id) { currentLevelId = id; document.getElementById('level-title').innerText = `Level ${id}`; showScreen('start-screen'); }
+    // --- LEVEL START ---
+    function preloadLevel(id) { 
+        currentLevelId = id; 
+        document.getElementById('level-title').innerText = `Level ${id}`;
+        
+        const cfg = gameConfig.find(l => l.id == id);
+        if (!cfg) return showDialog("Error", "Level data missing", "❌");
 
-    function instantStartLevel() {
-        if (!currentUser.levels[currentLevelId]) { 
-            currentUser.levels[currentLevelId] = { status: 'started', score: 3 }; 
-            currentUser.totalScore += 3; 
+        let timeLeft = 60;
+        const timerDisplay = document.getElementById('level-timer');
+        timerDisplay.innerText = timeLeft;
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--; timerDisplay.innerText = timeLeft;
+            if(timeLeft <= 0) { clearInterval(timerInterval); showDialog("Time's Up", "Timer ended!", "⏰"); }
+        }, 1000);
+
+        const startBtn = document.getElementById('start-level-btn');
+        const contentArea = document.getElementById('level-content');
+        const hintText = document.getElementById('instruction-text');
+        
+        startBtn.disabled = true; startBtn.innerText = "Please Wait...";
+        contentArea.innerHTML = ""; hintText.innerText = "";
+        
+        const hasTip = (cfg.hasTip === true || String(cfg.hasTip).toUpperCase() === 'TRUE');
+        const hasVideo = (cfg.hasVideo === true || String(cfg.hasVideo).toUpperCase() === 'TRUE');
+        const hasPdf = (cfg.hasPdf === true || String(cfg.hasPdf).toUpperCase() === 'TRUE');
+
+        if (hasTip) {
+            const tipMsg = "Pay close attention to the details!"; 
+            contentArea.innerHTML = `<div style="font-size:16px;">💡 <b>Tip:</b><br>${tipMsg}</div>`;
+            hintText.innerText = "Read tip. Wait 5s.";
+            setTimeout(() => { startBtn.disabled = false; startBtn.innerText = "Start Game (+3 pts)"; hintText.innerText = ""; }, 5000);
+        } 
+        else if (hasVideo) {
+            const finalUrl = getEmbedUrl(cfg.videoLink);
+            contentArea.innerHTML = `
+                <iframe class="video-frame" 
+                        src="${finalUrl}" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                </iframe>`;
+            hintText.innerText = "Watch the video...";
+            setTimeout(() => { 
+                startBtn.disabled = false; startBtn.innerText = "Start Game (+3 pts)"; 
+                hintText.innerText = "";
+            }, 5000); 
         }
-        const qData = gameConfig[currentLevelId - 1];
-        document.getElementById('q-text').innerText = qData.question;
-        const optContainer = document.getElementById('q-options'); optContainer.innerHTML = '';
-        qData.options.forEach((opt, idx) => {
-            const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt;
-            btn.onclick = () => handleAnswer(idx + 1, btn); optContainer.appendChild(btn);
-        });
-        showScreen('quiz-screen');
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'start' }) });
+        else if (hasPdf) {
+            contentArea.innerHTML = `<div class="clickable-pdf" onclick="pdfClicked(this, '${cfg.pdfLink}')"><i class="fab fa-google-drive content-icon"></i><div>View PDF</div></div>`;
+            hintText.innerText = "Click icon to open PDF";
+        } else {
+             startBtn.disabled = false; startBtn.innerText = "Start Game (+3 pts)";
+        }
+        showScreen('start-screen'); 
     }
 
-    function handleAnswer(selectedIdx, btnElement) {
-        const allBtns = document.querySelectorAll('.option-btn'); allBtns.forEach(b => { b.disabled = true; b.style.opacity = 0.5; });
+    function pdfClicked(el, link) {
+        const url = link && link.length > 5 ? link : 'https://drive.google.com';
+        window.open(url, '_blank');
+        document.getElementById('start-level-btn').disabled = false;
+        document.getElementById('start-level-btn').innerText = "Start Game (+3 pts)";
+        document.getElementById('instruction-text').innerText = "Ready!";
+        el.style.opacity = 0.5;
+    }
+
+    function exitLevel() { if(timerInterval) clearInterval(timerInterval); showScreen('home-screen'); }
+
+    // --- GAME DISPATCHER ---
+    function startMiniGame() {
+        if(timerInterval) clearInterval(timerInterval);
+        
+        if (!currentUser.levels[currentLevelId]) { 
+            currentUser.levels[currentLevelId] = { status: 'started', score: 3 }; currentUser.totalScore += 3; 
+        }
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'start' }) });
+
+        const cfg = gameConfig.find(l => l.id == currentLevelId);
+        
+        document.getElementById('memory-board').style.display = 'none';
+        document.getElementById('puzzle-board').style.display = 'none';
+        document.getElementById('finish-mini-btn').disabled = true;
+
+        const gType = cfg.gameType ? String(cfg.gameType).toLowerCase().trim() : 'memory';
+
+        if (gType === 'puzzle') {
+            setupPuzzleGame();
+            document.getElementById('mini-title').innerText = "Puzzle Challenge";
+            document.getElementById('mini-desc').innerText = "Reconstruct the image!";
+            document.getElementById('puzzle-board').style.display = 'block';
+        } else {
+            setupMemoryGame();
+            document.getElementById('mini-title').innerText = "Memory Match";
+            document.getElementById('mini-desc').innerText = "Find matching image pairs!";
+            document.getElementById('memory-board').style.display = 'grid';
+        }
+        
+        showScreen('minigame-screen');
+    }
+
+    // --- PUZZLE LOGIC ---
+    function setupPuzzleGame() {
+        const pieceContainer = document.getElementById('puzzle-pieces');
+        pieceContainer.innerHTML = '';
+        
+        document.querySelectorAll('.puzzle-slot').forEach(slot => {
+            slot.innerHTML = ''; 
+            slot.classList.remove('filled');
+        });
+
+        const piecesData = [
+            { id: 1, img: PuzzleAssets[0] }, { id: 2, img: PuzzleAssets[1] },
+            { id: 3, img: PuzzleAssets[2] }, { id: 4, img: PuzzleAssets[3] }
+        ];
+        
+        piecesData.sort(() => 0.5 - Math.random());
+
+        piecesData.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'puzzle-piece';
+            el.setAttribute('draggable', 'true');
+            el.dataset.id = p.id;
+            el.style.backgroundImage = `url(${p.img})`;
+            
+            el.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', p.id);
+            });
+            pieceContainer.appendChild(el);
+        });
+
+        document.querySelectorAll('.puzzle-slot').forEach(slot => {
+            slot.addEventListener('dragover', (e) => e.preventDefault());
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData('text/plain');
+                const expected = slot.getAttribute('data-expected');
+                
+                if (id === expected) {
+                    slot.innerHTML = ''; 
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = 'puzzle-filled-img';
+                    imgDiv.style.backgroundImage = `url(${PuzzleAssets[id-1]})`;
+                    imgDiv.style.backgroundSize = 'cover';
+                    
+                    slot.appendChild(imgDiv);
+                    slot.classList.add('filled');
+                    
+                    const originalPiece = document.querySelector(`.puzzle-piece[data-id="${id}"]`);
+                    if(originalPiece) originalPiece.remove();
+
+                    checkPuzzleWin();
+                }
+            });
+        });
+    }
+
+    function checkPuzzleWin() {
+        const filled = document.querySelectorAll('.puzzle-slot.filled').length;
+        if(filled === 4) {
+            confetti({ particleCount: 100, origin: { y: 0.6 } });
+            document.getElementById('finish-mini-btn').disabled = false;
+        }
+    }
+
+    // --- MEMORY LOGIC ---
+    function setupMemoryGame() {
+        const board = document.getElementById('memory-board');
+        board.innerHTML = '';
+        
+        const selectedImages = MemoryAssets.slice(0, 4);
+        let deck = [...selectedImages, ...selectedImages]; 
+        
+        deck.sort(() => 0.5 - Math.random());
+        
+        let flipped = [];
+        let matches = 0;
+
+        deck.forEach((imgSrc) => {
+            const card = document.createElement('div');
+            card.className = 'memory-card';
+            card.innerHTML = `
+                <div class="memory-card-front"><i class="fas fa-question" style="color:white; font-size:20px;"></i></div>
+                <div class="memory-card-back"><img src="${imgSrc}"></div>
+            `;
+            
+            card.onclick = function() {
+                if(card.classList.contains('flipped') || flipped.length >= 2) return;
+                card.classList.add('flipped');
+                flipped.push({ el: card, val: imgSrc });
+
+                if(flipped.length === 2) {
+                    if(flipped[0].val === flipped[1].val) {
+                        matches++;
+                        flipped = [];
+                        if(matches === 3) { 
+                            setTimeout(() => {
+                                confetti({ particleCount: 100, origin: { y: 0.6 } });
+                                document.getElementById('finish-mini-btn').disabled = false;
+                            }, 500);
+                        }
+                    } else {
+                        setTimeout(() => {
+                            flipped[0].el.classList.remove('flipped');
+                            flipped[1].el.classList.remove('flipped');
+                            flipped = [];
+                        }, 800);
+                    }
+                }
+            };
+            board.appendChild(card);
+        });
+    }
+
+    // --- FINISH MINI GAME -> QUIZ ---
+    function finishMiniGame() {
+        currentUser.totalScore += 4;
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'minigame', points: 4 }) });
+
+        const cfg = gameConfig.find(l => l.id == currentLevelId);
+        document.getElementById('q-text').innerText = cfg.question;
+        const optContainer = document.getElementById('q-options'); 
+        optContainer.innerHTML = '';
+        cfg.options.forEach((opt, idx) => {
+            const btn = document.createElement('button'); 
+            btn.className = 'option-btn'; 
+            btn.innerText = opt;
+            btn.onclick = () => handleQuizAnswer(idx + 1, btn); 
+            optContainer.appendChild(btn);
+        });
+        showScreen('quiz-screen');
+    }
+
+    function handleQuizAnswer(selectedIdx, btnElement) {
+        const allBtns = document.querySelectorAll('.option-btn'); 
+        allBtns.forEach(b => { b.disabled = true; b.style.opacity = 0.5; });
         btnElement.style.opacity = 1; btnElement.innerText += " (Checking...)";
         
         fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'finish', selectedOption: selectedIdx }) })
@@ -293,14 +675,13 @@
             if(d.isCorrect) {
                 btnElement.style.background = '#2ecc71'; btnElement.style.color = 'white'; 
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                showDialog("Correct!", "+7 Points added!", "🎉", () => initHome());
+                showDialog("Perfect!", "Level Complete!", "🏆", () => initHome());
             } else {
                 btnElement.style.background = '#e74c3c'; btnElement.style.color = 'white';
-                showDialog("Try Next Time", "+4 Points added.", "😔", () => initHome());
+                showDialog("Done", "Quiz incorrect.", "👍", () => initHome());
             }
         });
     }
-
     function logout() { currentUser = null; showScreen('login-screen'); }
 </script>
 </body>
