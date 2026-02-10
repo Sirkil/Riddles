@@ -261,7 +261,7 @@
                 <div id="display-name" style="font-size: 20px; font-weight: 700;">Player</div>
             </div>
 
-            <img src="Heleon_logo.png" alt="Logo" class="header-logo">
+            <img src="assets/Heleon_logo.png" alt="Logo" class="header-logo">
 
             <div class="score-container" onclick="toggleScoreMenu()">
                 <div class="score-badge"><i class="fas fa-star" style="color: #ffd700"></i><span id="display-score">0</span></div>
@@ -320,11 +320,11 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbye2ATG6lhtQUXfYJ4U_2uRHYT30fGqG7rAj1rMXjcwFjzlPZmpiK_8Z_D007ZHStEU/exec'; 
 
     const PuzzleAssets = [
-        "1.png", "2.png", "3.png", "4.png"  
+        "assets/1.png", "assets/2.png", "assets/3.png", "assets/4.png"  
     ];
 
     const MemoryAssets = [
-        "tooth.png", "broken-tooth.png", "molar.png", "tube.png",
+        "assets/tooth.png", "assets/broken-tooth.png", "assets/molar.png", "assets/tube.png",
     ];
 
     let currentUser = null;
@@ -626,7 +626,7 @@
                     if(flipped[0].val === flipped[1].val) {
                         matches++;
                         flipped = [];
-                        if(matches === 3) { 
+                        if(matches === 4) { 
                             setTimeout(() => {
                                 confetti({ particleCount: 100, origin: { y: 0.6 } });
                                 document.getElementById('finish-mini-btn').disabled = false;
