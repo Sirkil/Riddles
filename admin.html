@@ -2,97 +2,89 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; margin: 0; padding: 0; display: flex; justify-content: center; height: 100vh; color: #333; }
-    .container { width: 100%; max-width: 600px; background: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-    .header { background: #34495e; color: white; padding: 20px; text-align: center; }
+    body { font-family: 'Segoe UI', sans-serif; background: #2c3e50; margin: 0; display: flex; justify-content: center; height: 100vh; color: #333; }
+    .container { width: 100%; max-width: 700px; background: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .header { background: #34495e; color: white; padding: 15px; text-align: center; }
     .content { flex-grow: 1; padding: 20px; overflow-y: auto; background: #f4f6f7; }
-    
-    /* Login */
-    .login-screen { display: flex; flex-direction: column; justify-content: center; height: 100%; padding: 30px; }
-    input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-    button:hover { background: #219150; }
-
-    /* Admin Rows */
-    .admin-row { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .row-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px; }
-    .controls { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 10px; }
-    .save-btn { background: #2980b9; position: sticky; bottom: 20px; width: 90%; margin: 0 auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-    
-    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .admin-row { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; }
+    input, select { padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .save-btn { background: #27ae60; color: white; padding: 15px; width: 100%; border: none; font-size: 16px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="login-view" class="login-screen">
-        <h2 style="text-align: center;">Admin Access</h2>
-        <input type="password" id="admin-pass" placeholder="Enter Admin Password">
-        <button onclick="adminLogin()">Login</button>
-        <div id="loader" class="spinner"></div>
+    <div id="login-view" style="padding:50px;">
+        <h2 style="text-align:center">Admin Login</h2>
+        <input type="password" id="admin-pass" placeholder="Password">
+        <button onclick="adminLogin()" class="save-btn" style="margin-top:10px;">Login</button>
     </div>
 
-    <div id="dashboard-view" style="display: none; flex-direction: column; height: 100%;">
-        <div class="header">
-            <h2 style="margin:0">Level Manager</h2>
-            <small>Manage questions & visibility</small>
-        </div>
+    <div id="dashboard-view" style="display:none; flex-direction:column; height:100%;">
+        <div class="header"><h2>Level Manager</h2></div>
         <div class="content" id="list-container"></div>
-        <div style="padding: 10px; background: white; border-top: 1px solid #ddd;">
-            <button class="save-btn" onclick="saveData()">Save Changes</button>
-        </div>
+        <button class="save-btn" onclick="saveData()">Save Changes</button>
     </div>
 </div>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbytYCxHssnHE1fKPcA1rUxIIFJlYXTED3O6nrT-9A1SXbq4iidpOWDWSqCMC2O-W6hb/exec'; // <--- PASTE SAME URL
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzIXt0QvCjg3iYDx4zL5gVODVeFBXW2jd12TFJzMKMWxL7iH4BD6Com16YxSRkvuHir/exec'; // <--- PASTE YOUR URL
     let currentPass = '';
 
     function adminLogin() {
         const pass = document.getElementById('admin-pass').value;
-        if(!pass) return alert("Enter password");
-        
-        document.getElementById('loader').style.display = 'block';
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminLoad', pass: pass }) })
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById('loader').style.display = 'none';
-            if(data.status === 'success') {
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminLoad', pass }) })
+        .then(r => r.json()).then(d => {
+            if(d.status === 'success') {
                 currentPass = pass;
                 document.getElementById('login-view').style.display = 'none';
                 document.getElementById('dashboard-view').style.display = 'flex';
-                renderList(data.data);
-            } else {
-                alert("Wrong password");
-            }
+                renderList(d.data);
+            } else alert("Invalid Password");
         });
     }
 
     function renderList(rows) {
-        const container = document.getElementById('list-container');
-        container.innerHTML = '';
-        rows.forEach((row, i) => {
-            // Row format: [ID, Q, O1, O2, O3, O4, Correct, Active]
-            container.innerHTML += `
-            <div class="admin-row">
-                <div class="row-header">Level ${row[0]}</div>
-                <input type="text" id="q-${i}" value="${row[1]}" placeholder="Question Text">
-                <div class="options-grid">
-                    <input id="o1-${i}" value="${row[2]}" placeholder="Option 1">
-                    <input id="o2-${i}" value="${row[3]}" placeholder="Option 2">
-                    <input id="o3-${i}" value="${row[4]}" placeholder="Option 3">
-                    <input id="o4-${i}" value="${row[5]}" placeholder="Option 4">
+        const c = document.getElementById('list-container');
+        c.innerHTML = '';
+        rows.forEach((r, i) => {
+            // Mapping: 0:ID, 1:Q, 2-5:Opts, 6:Correct, 7:Active, 8:Game, 9:MediaType, 10:MediaContent
+            c.innerHTML += `
+            <div class="admin-row" id="row-${i}">
+                <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                    <span>Level ${r[0]}</span>
+                    <label><input type="checkbox" class="is-active" style="width:auto" ${r[7]?'checked':''}> Active</label>
                 </div>
-                <div class="controls">
-                    <label>Correct Option (1-4): <input type="number" id="c-${i}" value="${row[6]}" style="width: 50px; text-align: center;"></label>
-                    <label style="color: ${row[7] ? 'green' : 'red'}; font-weight: bold;">
-                        <input type="checkbox" id="a-${i}" ${row[7] ? 'checked' : ''}> Is Active?
+                <input class="q-text" value="${r[1]}" placeholder="Question">
+                <div class="grid-2">
+                    <input class="o1" value="${r[2]}" placeholder="Option 1">
+                    <input class="o2" value="${r[3]}" placeholder="Option 2">
+                    <input class="o3" value="${r[4]}" placeholder="Option 3">
+                    <input class="o4" value="${r[5]}" placeholder="Option 4">
+                </div>
+                <div class="grid-2">
+                    <label>Correct (1-4): <input type="number" class="correct" value="${r[6]}"></label>
+                    <label>Mini Game: 
+                        <select class="game-type">
+                            <option value="memory" ${r[8]=='memory'?'selected':''}>Memory</option>
+                            <option value="puzzle" ${r[8]=='puzzle'?'selected':''}>Puzzle</option>
+                        </select>
                     </label>
+                </div>
+                <div style="background:#f9f9f9; padding:10px; margin-top:10px; border-radius:5px;">
+                    <label><strong>Start Content:</strong></label>
+                    <select class="media-type">
+                        <option value="none" ${r[9]=='none'?'selected':''}>None</option>
+                        <option value="video" ${r[9]=='video'?'selected':''}>Video (YouTube)</option>
+                        <option value="pdf" ${r[9]=='pdf'?'selected':''}>PDF (Link)</option>
+                        <option value="audio" ${r[9]=='audio'?'selected':''}>Audio (Link)</option>
+                        <option value="tip" ${r[9]=='tip'?'selected':''}>Tip (Text)</option>
+                    </select>
+                    <input class="media-content" value="${r[10]}" placeholder="Paste Link or Tip Text here">
                 </div>
             </div>`;
         });
@@ -100,30 +92,22 @@
 
     function saveData() {
         const rows = [];
-        for(let i=0; i<20; i++) {
+        document.querySelectorAll('.admin-row').forEach((div, i) => {
             rows.push([
                 i+1,
-                document.getElementById(`q-${i}`).value,
-                document.getElementById(`o1-${i}`).value,
-                document.getElementById(`o2-${i}`).value,
-                document.getElementById(`o3-${i}`).value,
-                document.getElementById(`o4-${i}`).value,
-                document.getElementById(`c-${i}`).value,
-                document.getElementById(`a-${i}`).checked
+                div.querySelector('.q-text').value,
+                div.querySelector('.o1').value, div.querySelector('.o2').value,
+                div.querySelector('.o3').value, div.querySelector('.o4').value,
+                div.querySelector('.correct').value,
+                div.querySelector('.is-active').checked,
+                div.querySelector('.game-type').value,
+                div.querySelector('.media-type').value,
+                div.querySelector('.media-content').value
             ]);
-        }
-
-        const btn = document.querySelector('.save-btn');
-        btn.innerText = "Saving...";
-        btn.disabled = true;
-
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminSave', pass: currentPass, rows: rows }) })
-        .then(r => r.json())
-        .then(d => {
-            btn.innerText = "Save Changes";
-            btn.disabled = false;
-            alert("All changes saved successfully!");
         });
+        
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'adminSave', pass: currentPass, rows }) })
+        .then(r => r.json()).then(d => alert("Saved Successfully!"));
     }
 </script>
 </body>
