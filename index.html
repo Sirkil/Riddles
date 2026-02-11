@@ -26,9 +26,9 @@
         /* ASSETS */
         --bg-image: url('assets/background.png'); 
         --logo-image: url('assets/Sensodyne Ramadan Logo.png'); 
-        --header-pattern: url('assets/top_pattern.png'); 
-        --pdf-icon-img: url('assets/pdf_icon.png');
-        --tip-icon-img: url('assets/tip_icon.png');
+        --header-pattern: url('assets/top pattern.png'); 
+        --pdf-icon-img: url('assets/pdf icon.png');
+        --tip-icon-img: url('assets/tip icon.png');
         --star-icon: url('assets/star_icon.png'); 
     }
 
@@ -101,7 +101,7 @@
     input:focus { border-color: #fff; background: rgba(255,255,255,0.2); }
 
     .btn {
-        width: 85%; padding: 8px;
+        width: 85%; padding: 16px;
         background: linear-gradient(180deg, #0099cc 0%, #0056b3 100%);
         border: 1px solid rgba(255,255,255,0.3);
         border-radius: 20px 0 20px 0;
@@ -109,9 +109,6 @@
         font-size: 18px; font-weight: bold; cursor: pointer;
         margin-top: 10px; transition: all 0.2s;
         text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        display: block;
-        text-decoration: none; /* For links styled as buttons */
-        text-align: center;
     }
     .btn:active { transform: scale(0.98); }
     .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.5); margin-top: 10px; }
@@ -173,32 +170,53 @@
 
     /* --- PUZZLE GAME (1080x1080 SIMULATION) --- */
     .puzzle-board-container {
-        width: 100%; max-width: 340px; margin: 20px auto;
-        aspect-ratio: 1 / 1; position: relative;
+        width: 100%;
+        max-width: 340px;
+        margin: 20px auto;
+        /* Force 1:1 Aspect Ratio to simulate 1080x1080 */
+        aspect-ratio: 1 / 1; 
+        position: relative;
         background: rgba(255,255,255,0.05);
         border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px;
         box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
     
+    /* Drop Zones (Invisible Quadrants) */
     .drop-zone { position: absolute; width: 50%; height: 50%; z-index: 5; }
     .dz-1 { top: 0; left: 0; } .dz-2 { top: 0; right: 0; }
     .dz-3 { bottom: 0; left: 0; } .dz-4 { bottom: 0; right: 0; }
 
+    /* PUZZLE PIECE SIZING 
+       Based on 1080px Canvas:
+       - 698px = ~64.63%
+       - 546px = ~50.56%
+    */
     .puzzle-piece-placed {
-        position: absolute; object-fit: fill; pointer-events: none; z-index: 10;
+        position: absolute;
+        object-fit: fill; /* Ensure image fills the calculated area */
+        pointer-events: none; 
+        z-index: 10;
+        filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
     }
     
-    .piece-1-pos { width: 64.63%; height: 50.55%; top: 0; left: 0; z-index: 12; }
-    .piece-2-pos { width: 50.55%; height: 64.63%; top: 0; right: 0; z-index: 11; }
-    .piece-3-pos { width: 50.55%; height: 64.63%; bottom: 0; left: 0; z-index: 11; }
-    .piece-4-pos { width: 64.63%; height: 50.55%; bottom: 0; right: 0; z-index: 12; }
+    /* 1.png: 698x546 -> Top Left */
+    .piece-1-pos { width: 64.63%; height: 50.56%; top: 0; left: 0; z-index: 12; }
+    
+    /* 2.png: 546x698 -> Top Right */
+    .piece-2-pos { width: 50.56%; height: 64.63%; top: 0; right: 0; z-index: 11; }
+    
+    /* 3.png: 546x698 -> Bottom Left */
+    .piece-3-pos { width: 50.56%; height: 64.63%; bottom: 0; left: 0; z-index: 11; }
+    
+    /* 4.png: 698x546 -> Bottom Right */
+    .piece-4-pos { width: 64.63%; height: 50.56%; bottom: 0; right: 0; z-index: 12; }
 
+    /* Tray */
     .puzzle-tray {
         display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px;
         width: 100%; min-height: 90px; background: rgba(0,0,0,0.2); border-radius: 15px;
         justify-content: flex-start; scrollbar-width: none;
     }
-    
     .puzzle-piece-thumb { 
         width: 80px; height: 80px; flex-shrink: 0; cursor: grab;
         filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); touch-action: none;
@@ -353,7 +371,7 @@
             <div id="p-pieces" class="puzzle-tray"></div>
         </div>
 
-        <button id="mini-next-btn" class="btn" onclick="finishMiniGame(this)" disabled style="margin-top: auto; margin-bottom: 20px;">Next (+4 pts)</button>
+        <button id="mini-next-btn" class="btn" onclick="finishMiniGame(this)" disabled style="margin-top: auto; margin-bottom: 20px;">Next</button>
     </div>
 
     <div id="quiz-screen" class="screen" style="justify-content:center;">
@@ -461,7 +479,7 @@
         }
 
         showScreen('media-screen');
-        setTimeout(() => { waitBtn.innerText = "Start Game (+3 pts)"; waitBtn.disabled = false; waitBtn.onclick = () => enterMiniGame(); }, 3000);
+        setTimeout(() => { waitBtn.innerText = "Start Game"; waitBtn.disabled = false; waitBtn.onclick = () => enterMiniGame(); }, 3000);
     }
 
     function enterMiniGame() {
