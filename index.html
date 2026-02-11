@@ -6,9 +6,8 @@
 <title>Sensodyne Ramadan Riddles</title>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<!-- <link rel="stylesheet" href="styles.css"> -->
  <style>
-        /* --- FONT FACE --- */
+    /* --- FONT FACE --- */
     @font-face {
         font-family: 'Gilroy';
         src: url('assets/Gilroy-ExtraBold.ttf') format('opentype'),
@@ -24,12 +23,9 @@
         --accent: #00d2ff;    
         --text-color: #ffffff;
         
-        /* ASSETS */
         --bg-image: url('assets/background.png'); 
         --logo-image: url('assets/Sensodyne Ramadan Logo.png'); 
-        --header-pattern: url('assets/top pattern.png'); 
-        --pdf-icon-img: url('assets/pdf_icon.png');
-        --tip-icon-img: url('assets/tip_icon.png');
+        --header-pattern: url('assets/top_pattern.png'); 
         --star-icon: url('assets/star_icon.png'); 
         --done-icon: url('assets/done_icon.png'); 
     }
@@ -74,6 +70,7 @@
         min-height: 100%;
         padding: 20px;
         animation: fadeIn 0.4s ease-in-out;
+        position: relative;
     }
     .screen.active { display: flex; }
 
@@ -101,13 +98,10 @@
         appearance: none; 
     }
     input:focus { border-color: #fff; background: rgba(255,255,255,0.2); }
-    input::placeholder {
-        color: #e0e0e0; /* This is a nice Off-White */
-        opacity: 1;     /* Ensures the color is distinct */
-    }
+    input::placeholder { color: #e0e0e0; opacity: 1; }
 
     .btn {
-        width: 85%; padding: 8px;
+        width: 85%; padding: 12px;
         background: linear-gradient(180deg, #0099cc 0%, #0056b3 100%);
         border: 1px solid rgba(255,255,255,0.3);
         border-radius: 20px 0 20px 0;
@@ -115,9 +109,48 @@
         font-size: 18px; font-weight: bold; cursor: pointer;
         margin-top: 10px; transition: all 0.2s;
         text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        display: flex; justify-content: center; align-items: center; gap: 10px;
+        text-decoration: none;
     }
     .btn:active { transform: scale(0.98); }
+    .btn:disabled, .btn.disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; transform: none; pointer-events: none; }
+    
     .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.5); margin-top: 10px; }
+    
+    .btn-icon-only {
+        width: 50px; height: 50px;
+        padding: 0; border-radius: 12px;
+        display: flex; justify-content: center; align-items: center;
+        font-size: 20px;
+    }
+
+    .link-text {
+        color: #00d2ff; text-decoration: underline; cursor: pointer; margin-top: 15px; font-size: 14px;
+    }
+
+    /* --- NAVIGATION --- */
+    .nav-header {
+        width: 100%; display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 10px; padding: 0 5px; height: 50px;
+    }
+    .back-btn {
+        background: rgba(255,255,255,0.2); border: none; color: white;
+        width: 40px; height: 40px; border-radius: 50%;
+        display: flex; justify-content: center; align-items: center;
+        cursor: pointer; font-size: 18px;
+    }
+
+    /* --- TIMER --- */
+    .timer-circle {
+        width: 50px; height: 50px;
+        background: #0070c0;
+        border: 2px solid white;
+        border-radius: 50%;
+        color: white;
+        display: flex; justify-content: center; align-items: center;
+        font-weight: bold; font-size: 18px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
 
     /* --- HEADER --- */
     .header-banner {
@@ -146,14 +179,20 @@
         background: var(--logo-image) no-repeat center;
         background-size: contain; flex: 0 0 80px;
     }
-    .score-container { flex: 1; display: flex; justify-content: flex-end; position: relative; }
+    .score-container { flex: 1; display: flex; justify-content: flex-end; align-items: center;}
     .score-pill {
         background: rgba(0, 153, 204, 0.9);
         border: 1px solid rgba(255,255,255,0.5);
         border-radius: 20px; padding: 6px 14px;
         display: flex; align-items: center; gap: 6px;
-        font-weight: bold; cursor: pointer;
+        font-weight: bold;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* --- HOME ACTIONS --- */
+    .home-actions {
+        display: flex; gap: 10px; width: 90%; justify-content: center;
+        margin-top: 10px; margin-bottom: 40px;
     }
 
     /* --- LEVEL GRID --- */
@@ -170,68 +209,12 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer;
         border: 1px solid rgba(255,255,255,0.1);
     }
-    .level-btn.locked { opacity: 0.6; box-shadow: none; }
-    .level-btn.completed { background: white; border: 2px solid #FFD700; }
+    .level-btn.locked { opacity: 0.6; box-shadow: none; pointer-events: none;}
+    .level-btn.completed { background: white; border: 2px solid #FFD700; color: #0070c0; }
     .star-img { width: 70%; height: 70%; background: var(--star-icon) no-repeat center; background-size: contain; }
 
-    /* --- PUZZLE GAME (1080x1080 SIMULATION) --- */
-    .puzzle-board-container {
-        width: 100%;
-        max-width: 340px;
-        margin: 20px auto;
-        /* Force 1:1 Aspect Ratio to simulate 1080x1080 */
-        aspect-ratio: 1 / 1; 
-        position: relative;
-        background: rgba(255,255,255,0.05);
-        border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.2);
-    }
-    
-    /* Drop Zones (Invisible Quadrants) */
-    .drop-zone { position: absolute; width: 50%; height: 50%; z-index: 5; }
-    .dz-1 { top: 0; left: 0; } .dz-2 { top: 0; right: 0; }
-    .dz-3 { bottom: 0; left: 0; } .dz-4 { bottom: 0; right: 0; }
-
-    /* PUZZLE PIECE SIZING 
-       Based on 1080px Canvas:
-       - 698px = ~64.63%
-       - 546px = ~50.56%
-    */
-    .puzzle-piece-placed {
-        position: absolute;
-        object-fit: fill; /* Ensure image fills the calculated area */
-        pointer-events: none; 
-        z-index: 10;
-        filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
-    }
-    
-    /* 1.png: 698x546 -> Top Left */
-    .piece-1-pos { width: 64.63%; height: 50.56%; top: 0; left: 0; z-index: 12; }
-    
-    /* 2.png: 546x698 -> Top Right */
-    .piece-2-pos { width: 50.56%; height: 64.63%; top: 0; right: 0; z-index: 11; }
-    
-    /* 3.png: 546x698 -> Bottom Left */
-    .piece-3-pos { width: 50.56%; height: 64.63%; bottom: 0; left: 0; z-index: 11; }
-    
-    /* 4.png: 698x546 -> Bottom Right */
-    .piece-4-pos { width: 64.63%; height: 50.56%; bottom: 0; right: 0; z-index: 12; }
-
-    /* Tray */
-    .puzzle-tray {
-        display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px;
-        width: 100%; min-height: 90px; background: rgba(0,0,0,0.2); border-radius: 15px;
-        justify-content: flex-start; scrollbar-width: none;
-    }
-    .puzzle-piece-thumb { 
-        width: 80px; height: 80px; flex-shrink: 0; cursor: grab;
-        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); touch-action: none;
-        background: rgba(255,255,255,0.1); border-radius: 5px; padding: 5px;
-    }
-    .puzzle-piece-thumb img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-
     /* --- MEMORY GAME --- */
-    .memory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px 0; width: 100%; }
+    .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; width: 100%; }
     .memory-card { 
         background: #0070c0; aspect-ratio: 1; border-radius: 8px; 
         cursor: pointer; display:flex; justify-content:center; align-items:center; 
@@ -241,15 +224,10 @@
     .memory-card img { width: 80%; height: 80%; object-fit: contain; display: none; }
     .memory-card.flipped img { display: block; }
 
-    /* --- OTHER STYLES --- */
+    /* --- CONTENT CARDS --- */
     .content-card {
         background: rgba(255,255,255,0.95); border-radius: 24px; padding: 25px; width: 90%;
         text-align: center; color: #333; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    .media-custom-icon { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-    .badge-top {
-        background: linear-gradient(90deg, #003366, #0070c0); color: white; padding: 8px 25px; 
-        border-radius: 20px; display: inline-block; margin-bottom: 20px; font-weight: bold; font-size: 14px;
     }
     .quiz-opt {
         background: white; border: none; color: #0070c0; 
@@ -262,6 +240,18 @@
         background: linear-gradient(135deg, #002244, #0056b3); padding: 25px; border-radius: 16px; 
         margin-bottom: 25px; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
+
+    /* --- PDF SPECIFIC --- */
+    .pdf-link-btn {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: #f0f0f0; border: 2px solid #0070c0; border-radius: 16px;
+        padding: 20px; width: 100%; text-decoration: none; color: #0070c0;
+        font-weight: bold; transition: 0.2s; margin: 20px 0; cursor: pointer;
+    }
+    .pdf-link-btn:active { background: #e0e0e0; transform: scale(0.98); }
+    .pdf-icon-img { width: 50px; height: 50px; margin-bottom: 10px; object-fit: contain; }
+
+    /* --- DONE SCREEN --- */
     .done-card {
         border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 40px 30px; width: 85%;
         text-align: center; background: transparent; box-shadow: none;
@@ -270,22 +260,8 @@
         width: 120px; height: 120px; background: var(--done-icon) no-repeat center; 
         background-size: contain; margin: 0 auto 20px auto;
     }
-    .done-text { font-size: 32px; font-weight: 800; color: white; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-    .done-score { font-size: 18px; color: #ddd; margin-top: 5px; margin-bottom: 30px; }
     
-    .rewards-menu {
-        position: absolute; top: 120%; right: 0;
-        background: #004a99; border: 1px solid #00d2ff;
-        border-radius: 12px; padding: 15px; width: 180px;
-        z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-        opacity: 0; visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .rewards-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
-    .reward-item { font-size: 13px; margin: 10px 0; opacity: 0.6; color: white; display:flex; gap:8px; align-items:center; }
-    .reward-item.unlocked { opacity: 1; font-weight: bold; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-    
+    /* --- DIALOGS --- */
     .dialog-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.8); display: none;
@@ -296,7 +272,19 @@
         background: linear-gradient(135deg, #0070c0, #004a99);
         width: 85%; padding: 30px; border-radius: 24px;
         text-align: center; border: 1px solid rgba(255,255,255,0.3);
+        position: relative;
     }
+    .close-dialog {
+        position: absolute; top: 15px; right: 20px; 
+        color: white; font-size: 24px; cursor: pointer;
+    }
+    .reward-item {
+        background: rgba(255,255,255,0.1); margin: 10px 0; padding: 15px;
+        border-radius: 12px; display: flex; align-items: center; gap: 15px;
+        opacity: 0.5; transition: 0.3s; text-align: left;
+    }
+    .reward-item.unlocked { opacity: 1; background: rgba(255,255,255,0.2); border: 1px solid #FFD700; }
+    .reward-icon { font-size: 24px; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
  </style>
@@ -307,20 +295,22 @@
     
     <div id="login-screen" class="screen active" style="justify-content: center;">
         <div class="logo"></div>
-        <div class="input-group"><input type="email" id="login-email" placeholder="Email Address"></div>
-        <button class="btn" onclick="handleLogin(this)">Start Playing</button>
+        <h3 style="margin-bottom:15px;">Welcome</h3>
+        <div class="input-group"><input type="email" id="login-email" placeholder="Enter your Email"></div>
+        <button class="btn" onclick="handleAuth(this)">Next</button>
     </div>
 
     <div id="register-screen" class="screen" style="justify-content: center;">
-        <h2 style="margin-bottom:30px;">New Player</h2>
+        <div class="logo"></div>
+        <h3 style="margin:0 0 20px 0;">Complete Profile</h3>
         <div class="input-group"><input type="text" id="reg-name" placeholder="Full Name"></div>
         <div class="input-group"><input type="tel" id="reg-phone" placeholder="Phone Number"></div>
-        <div class="input-group"><input type="email" id="reg-email" placeholder="Email Address" readonly></div>
-        <button class="btn" onclick="handleRegister(this)">Create & Play</button>
-        <button class="btn btn-secondary" onclick="showScreen('login-screen')">Cancel</button>
+        <input type="hidden" id="reg-email-hidden"> 
+        <button class="btn" onclick="handleRegister(this)">Start Playing</button>
+        <div class="link-text" onclick="showScreen('login-screen')">Back</div>
     </div>
 
-    <div id="home-screen" class="screen" onclick="closeRewards()" style="padding:0;">
+    <div id="home-screen" class="screen" style="padding:0;">
         <div class="header-banner">
             <div class="header-pattern"></div>
             <div class="header-content">
@@ -330,62 +320,58 @@
                 </div>
                 <div class="logo-center"></div>
                 <div class="score-container">
-                    <div class="score-pill" onclick="toggleRewards(event)">
+                    <div class="score-pill">
                         <span>⭐</span> <span id="display-score">0</span>
                     </div>
-                    <div id="rewards-menu" class="rewards-menu">
-                        <div style="font-size:12px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px;">REWARDS</div>
-                        <div class="reward-item" id="rwd-1"><span>🧢</span> 10-50 pts</div>
-                        <div class="reward-item" id="rwd-2"><span>🧴</span> 50-100 pts</div>
-                        <div class="reward-item" id="rwd-3"><span>🎹</span> 100+ pts</div>
-                    </div>
                 </div>
             </div>
         </div>
+        
         <div class="level-grid" id="level-grid"></div>
-        <button class="btn btn-secondary" style="width:60%; margin-top:10px; margin-bottom:40px;" onclick="location.reload()">Log Out</button>
+
+        <div class="home-actions">
+            <button class="btn" style="flex: 2; margin-top:0;" onclick="openRewards()">Rewards</button>
+            <button class="btn btn-secondary btn-icon-only" style="margin-top:0;" onclick="handleLogout()"><i class="fa fa-sign-out-alt"></i></button>
+        </div>
     </div>
 
-    <div id="media-screen" class="screen" style="justify-content:center;">
+    <div id="media-screen" class="screen">
+        <div class="nav-header">
+            <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+            <div id="media-timer" class="timer-circle">60</div>
+        </div>
+        
         <div class="logo" style="transform:scale(0.8); margin-top:0; margin-bottom:10px;"></div>
-        <div class="badge-top" id="media-lvl-badge">Level 1</div>
         <div class="content-card">
             <div id="media-icon-container" style="margin-bottom:10px; display:flex; justify-content:center;"></div>
-            <div id="media-container"></div>
-            <div id="media-text" style="font-weight:bold; color:#0070c0; margin-top:10px;">Click to Open</div>
+            <div id="media-content-area"></div>
         </div>
-        <button id="media-wait-btn" class="btn" style="margin-top:30px;" disabled>Please Wait...</button>
-        <button class="btn btn-secondary" onclick="showScreen('home-screen')">Back</button>
-    </div>
-
-    <div id="minigame-screen" class="screen">
-        <div class="logo" style="transform:scale(0.7); margin:10px 0;"></div>
-        <h2 id="mini-title" style="margin: 10px 0;">Game Time</h2>
-        <p style="font-size:14px; opacity:0.8; margin-top:0;">Complete to unlock the question!</p>
         
-        <div id="memory-board" class="memory-grid" style="display:none"></div>
-        
-        <div id="puzzle-board" style="display:none; width:100%; max-width:320px;">
-            <div class="puzzle-board-container">
-                <div class="puzzle-grid" id="puzzle-slots">
-                    <div class="drop-zone dz-1" data-s="1"></div>
-                    <div class="drop-zone dz-2" data-s="2"></div>
-                    <div class="drop-zone dz-3" data-s="3"></div>
-                    <div class="drop-zone dz-4" data-s="4"></div>
-                </div>
-            </div>
-            <div id="p-pieces" class="puzzle-tray"></div>
-        </div>
-
-        <button id="mini-next-btn" class="btn" onclick="finishMiniGame(this)" disabled style="margin-top: auto; margin-bottom: 20px;">Next</button>
+        <button id="media-next-btn" class="btn disabled" style="margin-top:auto; margin-bottom:20px;" disabled>
+            Please Wait...
+        </button>
     </div>
 
     <div id="quiz-screen" class="screen" style="justify-content:center;">
-        <div class="logo" style="transform:scale(0.7); margin-bottom:20px; margin-top:0;"></div>
+        <div class="nav-header" style="position:absolute; top:20px; left:20px; width:auto;">
+            <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+        </div>
+
+        <div class="logo" style="transform:scale(0.7); margin-bottom:20px; margin-top:40px;"></div>
         <div class="quiz-question-box">
             <h3 id="q-text" style="margin:0; text-align:center; font-weight:600; font-size: 18px;">Question?</h3>
         </div>
         <div id="q-options" style="width:100%;"></div>
+    </div>
+
+    <div id="minigame-screen" class="screen">
+        <div class="nav-header">
+            <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+        </div>
+        <div class="logo" style="transform:scale(0.7); margin:0 0;"></div>
+        <h2 style="margin: 10px 0;">Memory Match</h2>
+        
+        <div id="memory-board" class="memory-grid"></div>
     </div>
 
     <div id="done-screen" class="screen" style="justify-content:center;">
@@ -393,129 +379,348 @@
         <div class="done-card">
             <div class="done-icon-large"></div>
             <h1 class="done-text">DONE</h1>
-            <p class="done-score">Score: <span id="final-score" style="font-weight:bold; color:white;">10</span></p>
+            <p class="done-score">Total Score: <span id="final-score" style="font-weight:bold; color:white;"></span></p>
             <button class="btn" style="width:100%;" onclick="showScreen('home-screen')">OK</button>
         </div>
     </div>
 </div>
 
-<div id="level-score-dialog" class="dialog-overlay" onclick="this.style.display='none'">
+<div id="rewards-dialog" class="dialog-overlay" onclick="closeRewards()">
     <div class="dialog-box" onclick="event.stopPropagation()">
-        <h2 style="margin-top:0; color:white;">Level Completed</h2>
-        <div style="font-size:60px; margin:15px 0;">⭐</div>
-        <p style="font-size:18px; color:white;">You earned <b id="dialog-lvl-pts" style="color:#FFD700; font-size:24px;">0</b> points</p>
-        <button class="btn" onclick="document.getElementById('level-score-dialog').style.display='none'">Close</button>
+        <span class="close-dialog" onclick="closeRewards()">&times;</span>
+        <h2 style="margin-top:0; color:white;">Your Rewards</h2>
+        <div class="reward-item" id="rwd-1">
+            <div class="reward-icon">🧢</div>
+            <div><b>Cap</b><br><span style="font-size:12px;">Earn 50 points</span></div>
+        </div>
+        <div class="reward-item" id="rwd-2">
+            <div class="reward-icon">🧴</div>
+            <div><b>Lotion</b><br><span style="font-size:12px;">Earn 100 points</span></div>
+        </div>
+        <div class="reward-item" id="rwd-3">
+            <div class="reward-icon">🎹</div>
+            <div><b>Grand Prize</b><br><span style="font-size:12px;">Earn 200 points</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="exit-dialog" class="dialog-overlay">
+    <div class="dialog-box" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; color:white;">Exit Level?</h3>
+        <p style="color:rgba(255,255,255,0.8); margin-bottom:25px;">Your progress for this level will be lost.</p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="flex:1;" onclick="confirmExit()">Exit</button>
+            <button class="btn btn-secondary" style="flex:1; margin-top:0;" onclick="closeExitAlert()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="custom-alert" class="dialog-overlay">
+    <div class="dialog-box" onclick="event.stopPropagation()">
+        <h3 id="alert-title" style="margin-top:0; color:white;">Alert</h3>
+        <p id="alert-msg" style="color:rgba(255,255,255,0.9); margin-bottom:25px;"></p>
+        <button class="btn" onclick="closeCustomAlert()">OK</button>
     </div>
 </div>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzIXt0QvCjg3iYDx4zL5gVODVeFBXW2jd12TFJzMKMWxL7iH4BD6Com16YxSRkvuHir/exec'; 
-    let currentUser = null;
-    let levelsMap = new Map();
-    let currentLevelId = 0;
+    // --- 1. CONFIGURATION ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbxyAbNkAl7toIm4sGLSP9JBWtbyha4hiPy32crPLBeL3cTrlw5vmUWaSsWDOSxekqeQ/exec"; 
 
-    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function toggleBtnLoading(btn, isLoading) { if(isLoading) { btn.dataset.ogText = btn.innerText; btn.innerText = "Loading..."; btn.classList.add('loading'); btn.disabled = true; } else { if(btn.dataset.ogText) btn.innerText = btn.dataset.ogText; btn.classList.remove('loading'); btn.disabled = false; } }
+    const LEVEL_CONFIG = [
+        { id: 1, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/1.mp4', unlockTime: 60, points: 10 },
+        { id: 2, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/2.mp4', unlockTime: 60, points: 10 },
+        { id: 3, isActive: true, type: 'pdf', media: 'https://drive.google.com/file/d/12jWjJs_s-i-KqTfYyLDdyi4dLzVOv9q8/view', unlockTime: 60, question: "Dentine hypersensitivity is often described as?", options: ["Rare condition", "Short, sharp pain", "Permanent issue", "Viral infection"], correct: 2, points: 10 },
+        { id: 4, isActive: true, type: 'pdf', media: 'https://drive.google.com/file/d/1duRSL7VPU7tezXLWnXFiWjx0BzU9LLX-/view', unlockTime: 60, question: "According to MEA experts, screening should be for?", options: ["Only high-risk", "Visible loss", "All patients", "No one"], correct: 3, points: 1105 },
+        { id: 5, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/1.mp3', unlockTime: 60, points: 10 },
+        { id: 6, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/2.mp3', unlockTime: 60, points: 10 },
+        { id: 7, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/3.mp3', unlockTime: 60, points: 10 },
+        { id: 8, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/4.mp3', unlockTime: 60, points: 10 },
+        { id: 9, isActive: true, type: 'quiz', question: "What percentage of DH patients typically do NOT mention their condition to dentists?", options: ["10%", "25%", "50%", "75%"], correct: 3, points: 10 },
+        { id: 10, isActive: true, type: 'quiz', question: "Which diagnostic tool is recommended by MEA experts for DH assessment?", options: ["Thermal imaging camera", "Cold air blast test using 3-way syringe", "Electric pulp testing only", "Bitewing radiographs"], correct: 2, points: 10 },
+        { id: 11, isActive: true, type: 'quiz', question: "The Schiff scale score '3' indicates:", options: ["Mild discomfort without request to stop", "No response to stimulus", "Patient requests discontinuation and considers stimulus painful", "Normal sensitivity"], correct: 3, points: 10 },
+        { id: 12, isActive: true, type: 'quiz', question: "The first step in the MEA management algorithm for DH is:", options: ["Laser therapy", "Patient education & behavior modification", "Fluoride varnish", "Gingival grafting"], correct: 2, points: 10 },
+        { id: 13, isActive: true, type: 'quiz', question: "According to the content, DH negatively impacts patients' quality of life by:", options: ["Improving oral hygiene habits", "Affecting emotional, social, and functional aspects", "Increasing appetite", "Reducing dental visits"], correct: 2, points: 10 },
+        { id: 14, isActive: true, type: 'quiz', question: "A key barrier preventing proper DH diagnosis is:", options: ["Excessive diagnostic time", "Overestimation of DH importance", "Lack of proactive screening", "High cost of diagnostic tools"], correct: 3, points: 10 },
+        { id: 15, isActive: true, type: 'quiz', question: "For asymptomatic patients who answer 'NO' to sensitivity, the next step is:", options: ["Start immediate in-office treatment", "Use the DHEQ-15 questionnaire", "Perform cold air blast test", "No further evaluation"], correct: 2, points: 10 },
+        { id: 16, isActive: true, type: 'quiz', question: "DH tends to reoccur if:", options: ["The patient uses only water flossers", "Desensitizing agents are discontinued", "Fluoride toothpaste is used daily", "Patients consume hot beverages"], correct: 3, points: 10 },
+        { id: 17, isActive: true, type: 'quiz', question: "Question 1: Based on the Schiff scale, what score best represents her response?", options: ["0 – No response", "Responds but does not request discontinuation", "2 – Moves away or requests discontinuation", "Severe pain and immediate discontinuation"], correct: 4, points: 10 },
+        { id: 18, isActive: true, type: 'quiz', question: "Question 2: According to the MEA DH algorithm, what is the next recommended step?", options: ["Begin desensitizing toothpaste immediately", "Administer the DHEQ-15 questionnaire", "Conduct a cold air blast test", "No further evaluation required"], correct: 2, points: 10 },
+        { id: 19, isActive: true, type: 'quiz', question: "Question 3: Where should this patient be placed in the stepwise DH management approach?", options: ["Step 1 – Patient education & behavior modification", "Step 2 – Continue home-based toothpaste", "Step 3 – In-office treatments (varnish, laser)", "Step 4 – Multidisciplinary referral"], correct: 3, points: 10 },
+        { id: 20, isActive: true, type: 'memory', points: 10 }
+    ];
+
+    // --- 2. APP STATE ---
+    let currentUser = {
+        name: "", email: "", phone: "", totalScore: 0, completedLevels: [] 
+    };
     
-    function handleLogin(btn) {
-        const email = document.getElementById('login-email').value;
-        if(!email) return alert("Please enter email");
-        toggleBtnLoading(btn, true);
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', email }) }).then(r=>r.json()).then(d=>{ toggleBtnLoading(btn,false); if(d.status==='success') loadUserData(d); else if(d.message.includes('not found')) { document.getElementById('reg-email').value = email; showScreen('register-screen'); } else alert(d.message); });
+    let currentLevelId = 0;
+    let timerInterval = null;
+
+    // --- 3. NAVIGATION & UI ---
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
     }
+
+    // --- DIALOGS (REPLACING ALERTS) ---
+    function showAlert(title, msg) {
+        document.getElementById('alert-title').innerText = title;
+        document.getElementById('alert-msg').innerText = msg;
+        document.getElementById('custom-alert').style.display = 'flex';
+    }
+    function closeCustomAlert() {
+        document.getElementById('custom-alert').style.display = 'none';
+    }
+
+    function triggerExitAlert() { document.getElementById('exit-dialog').style.display = 'flex'; }
+    function closeExitAlert() { document.getElementById('exit-dialog').style.display = 'none'; }
+    function confirmExit() { closeExitAlert(); showScreen('home-screen'); }
+    function handleLogout() { if(confirm("Log out?")) location.reload(); }
+
+    // --- 4. BACKEND INTEGRATION ---
+    function sendRequest(data, callback) {
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => callback(result))
+        .catch(error => {
+            showAlert("Error", "Connection lost. Please check internet.");
+            const btns = document.querySelectorAll('.btn');
+            btns.forEach(b => { if(b.innerText === "Loading...") b.innerText = "Try Again"; });
+        });
+    }
+
+    // --- 5. AUTH LOGIC (Updated Flow) ---
+    function handleAuth(btn) {
+        const email = document.getElementById('login-email').value.trim();
+        if(!email) return showAlert("Error", "Please enter your email.");
+
+        btn.innerText = "Loading...";
+        
+        // Check if user exists (Login Action)
+        sendRequest({ action: 'login', email: email }, (res) => {
+            if(res.status === 'success') {
+                // User Exists -> Go to Game
+                currentUser = res.user;
+                renderHome();
+                showScreen('home-screen');
+                btn.innerText = "Next";
+            } else if (res.status === 'not_found') {
+                // User New -> Go to Register
+                document.getElementById('reg-email-hidden').value = email; // Pass email
+                showScreen('register-screen');
+                btn.innerText = "Next";
+            } else {
+                showAlert("Error", res.message || "Something went wrong");
+                btn.innerText = "Next";
+            }
+        });
+    }
+
     function handleRegister(btn) {
         const name = document.getElementById('reg-name').value;
         const phone = document.getElementById('reg-phone').value;
-        const email = document.getElementById('reg-email').value;
-        toggleBtnLoading(btn, true);
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'register', name, phone, email }) }).then(r=>r.json()).then(d=>{ toggleBtnLoading(btn,false); if(d.status==='success') loadUserData(d); });
+        const email = document.getElementById('reg-email-hidden').value; // Get hidden email
+        
+        if(!name || !phone) return showAlert("Error", "Please fill all details.");
+        
+        btn.innerText = "Loading...";
+        sendRequest({ action: 'register', name, email, phone }, (res) => {
+            if(res.status === 'success') {
+                currentUser = res.user;
+                renderHome();
+                showScreen('home-screen');
+            } else {
+                showAlert("Error", res.message);
+            }
+            btn.innerText = "Start Playing";
+        });
     }
-    function loadUserData(data) { currentUser = data.user; levelsMap.clear(); data.gameConfig.forEach(l => levelsMap.set(l.id, l)); renderHome(); showScreen('home-screen'); }
+
+    // --- 6. RENDER HOME (UPDATED: Standalone Levels) ---
     function renderHome() {
         document.getElementById('display-name').innerText = currentUser.name;
         document.getElementById('display-score').innerText = currentUser.totalScore;
-        const grid = document.getElementById('level-grid'); grid.innerHTML = '';
-        levelsMap.forEach((cfg, id) => {
-            const userLvl = currentUser.levels[id];
+        const grid = document.getElementById('level-grid'); 
+        grid.innerHTML = '';
+
+        LEVEL_CONFIG.forEach(lvl => {
             const div = document.createElement('div');
-            if(userLvl && userLvl.status === 'completed') { div.className = 'level-btn completed'; div.innerHTML = '<div class="star-img"></div>'; div.onclick = () => showLevelScore(id, userLvl.score); }
-            else if (cfg.isActive) { div.className = 'level-btn'; div.innerText = id; div.onclick = () => startLevelFlow(id); }
-            else { div.className = 'level-btn locked'; div.innerText = id; }
+            const isDone = currentUser.completedLevels.includes(lvl.id);
+            
+            // NEW LOGIC: 
+            // 1. If isActive is FALSE -> LOCKED (Always).
+            // 2. If isActive is TRUE -> UNLOCKED (Playable).
+            // 3. If Done -> Show Star (Visual only).
+
+            if (!lvl.isActive) {
+                // Manually Closed
+                div.className = 'level-btn locked';
+                div.innerText = lvl.id;
+            } else if (isDone) {
+                // Completed
+                div.className = 'level-btn completed';
+                div.innerHTML = '<div class="star-img"></div>';
+            } else {
+                // Active & Not Done -> Playable (Standalone)
+                div.className = 'level-btn';
+                div.innerText = lvl.id;
+                div.onclick = () => startLevel(lvl.id);
+            }
             grid.appendChild(div);
         });
-        updateRewardsMenu(currentUser.totalScore);
-    }
-    function showLevelScore(id, score) { document.getElementById('dialog-lvl-pts').innerText = score; document.getElementById('level-score-dialog').style.display = 'flex'; }
-    function toggleRewards(e) { e.stopPropagation(); document.getElementById('rewards-menu').classList.toggle('show'); }
-    function closeRewards() { document.getElementById('rewards-menu').classList.remove('show'); }
-    function updateRewardsMenu(score) { if(score>=10) document.getElementById('rwd-1').classList.add('unlocked'); if(score>=50) document.getElementById('rwd-2').classList.add('unlocked'); if(score>=100) document.getElementById('rwd-3').classList.add('unlocked'); }
-
-    /* --- SMART MEDIA LOADER (Updated for Redirect) --- */
-    function startLevelFlow(id) {
-        currentLevelId = id; 
-        const cfg = levelsMap.get(id);
-        document.getElementById('media-lvl-badge').innerText = `Level ${id}`;
-        const iconCon = document.getElementById('media-icon-container'), mediaCon = document.getElementById('media-container'), waitBtn = document.getElementById('media-wait-btn'), txt = document.getElementById('media-text');
-        iconCon.innerHTML = ''; mediaCon.innerHTML = ''; waitBtn.innerText = "Please Wait..."; waitBtn.classList.remove('loading'); waitBtn.disabled = true;
         
-        const link = cfg.mediaContent || "";
+        updateRewardsUI();
+    }
 
-        if(cfg.mediaType === 'tip') { 
-            iconCon.innerHTML = `<img src="assets/tip_icon.png" class="media-custom-icon">`; 
-            mediaCon.innerHTML = `<p style="font-size:18px; padding:10px;">${cfg.mediaContent}</p>`; 
-            txt.innerText = "Read the Tip"; 
-        } 
-        else if (cfg.mediaType === 'pdf') { 
-            iconCon.innerHTML = `<img src="assets/pdf_icon.png" class="media-custom-icon">`; 
-            txt.innerHTML = `<a href="${link}" target="_blank" class="btn" style="text-decoration:none; display:inline-block; margin-top:5px;">📄 Open PDF</a>`; 
-        } 
-        else if (cfg.mediaType === 'video') { 
-            iconCon.innerHTML = '<i class="fas fa-video" style="font-size:60px; color:#0070c0; margin-bottom:10px;"></i>';
-            mediaCon.innerHTML = '';
-            txt.innerHTML = `<a href="${link}" target="_blank" class="btn" style="text-decoration:none; display:inline-block; margin-top:5px;">🎥 Watch Video</a>`;
-        } 
-        else if (cfg.mediaType === 'audio') { 
-            iconCon.innerHTML = '<i class="fas fa-headphones" style="font-size:60px; color:#0070c0; margin-bottom:10px;"></i>';
-            mediaCon.innerHTML = '';
-            txt.innerHTML = `<a href="${link}" target="_blank" class="btn" style="text-decoration:none; display:inline-block; margin-top:5px;">🎧 Listen to Audio</a>`;
-        } 
-        else { 
-            iconCon.innerHTML = '<i class="fas fa-gamepad" style="font-size:60px; color:#0070c0;"></i>'; 
-            txt.innerText = "Get Ready"; 
+    // --- 7. GAME LOGIC ---
+    function startLevel(id) {
+        currentLevelId = id;
+        const cfg = LEVEL_CONFIG.find(l => l.id === id);
+        
+        if (cfg.type === 'video' || cfg.type === 'audio' || cfg.type === 'pdf') {
+            setupMediaScreen(cfg);
+        } else if (cfg.type === 'quiz') {
+            setupQuizScreen(cfg);
+        } else if (cfg.type === 'memory') {
+            setupMemoryGame();
+        }
+    }
+
+    function setupMediaScreen(cfg) {
+        const iconCon = document.getElementById('media-icon-container');
+        const contentArea = document.getElementById('media-content-area');
+        const btn = document.getElementById('media-next-btn');
+        const timerDisplay = document.getElementById('media-timer');
+        
+        iconCon.innerHTML = ''; contentArea.innerHTML = '';
+        btn.disabled = true; btn.classList.add('disabled');
+        
+        // --- PDF LOGIC ---
+        if(cfg.type === 'pdf') {
+            timerDisplay.innerText = "--";
+            contentArea.innerHTML = `
+                <p>Read the document to complete the level.</p>
+                <div class="pdf-link-btn" id="pdf-trigger">
+                    <img src="assets/pdf_icon.png" class="pdf-icon-img" alt="PDF">
+                    <span>Tap to View PDF</span>
+                </div>
+            `;
+            btn.innerText = "Take Quiz";
+            
+            // Redirect to Link provided in config
+            document.getElementById('pdf-trigger').onclick = () => {
+                window.open(cfg.media, '_blank'); 
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+            };
+            
+            btn.onclick = () => setupQuizScreen(cfg); 
+            showScreen('media-screen');
+            return;
         }
 
+        // --- AUDIO/VIDEO LOGIC ---
+        let iconClass = cfg.type === 'video' ? 'fa-video' : 'fa-headphones';
+        iconCon.innerHTML = `<i class="fas ${iconClass}" style="font-size:50px; color:#0070c0;"></i>`;
+        
+        if(cfg.type === 'video') {
+            // Updated to use actual HTML5 Video
+            contentArea.innerHTML = `
+                <video width="100%" height="200" controls autoplay style="border-radius:10px; background:black;">
+                    <source src="${cfg.media}" type="video/mp4">
+                    Your browser does not support video.
+                </video>
+            `;
+        } else {
+             // Updated to use actual HTML5 Audio
+             contentArea.innerHTML = `
+                <div style="background:#eee; padding:20px; border-radius:30px; margin-top:10px;">
+                    <audio controls autoplay style="width:100%;">
+                        <source src="${cfg.media}" type="audio/mpeg">
+                        Your browser does not support audio.
+                    </audio>
+                </div>`;
+        }
+
+        btn.innerText = "Finish Level";
+        btn.onclick = () => completeLevel(cfg.points);
         showScreen('media-screen');
-        setTimeout(() => { waitBtn.innerText = "Start Game"; waitBtn.disabled = false; waitBtn.onclick = () => enterMiniGame(); }, 3000);
+
+        // Timer
+        let timeLeft = cfg.unlockTime || 10;
+        timerDisplay.innerText = timeLeft;
+        if(timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+            }
+        }, 1000);
     }
 
-    function enterMiniGame() {
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'start' }) });
-        currentUser.totalScore += 3;
-        const cfg = levelsMap.get(currentLevelId);
-        const gameType = cfg.gameType || 'memory';
-        document.getElementById('memory-board').style.display = 'none'; document.getElementById('puzzle-board').style.display = 'none'; document.getElementById('mini-next-btn').disabled = true;
-        if(gameType === 'puzzle') setupPuzzle(); else setupMemory();
-        showScreen('minigame-screen');
+    function setupQuizScreen(cfg) {
+        document.getElementById('q-text').innerText = cfg.question;
+        const optCon = document.getElementById('q-options'); 
+        optCon.innerHTML = '';
+        
+        cfg.options.forEach((opt, idx) => {
+            const btn = document.createElement('div'); 
+            btn.className = 'quiz-opt'; 
+            btn.innerText = opt;
+            btn.onclick = function() { 
+                document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected')); 
+                this.classList.add('selected'); 
+                
+                setTimeout(() => {
+                    const isCorrect = (idx + 1) === cfg.correct;
+                    if(isCorrect) {
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                        completeLevel(cfg.points);
+                    } else {
+                        showAlert("Wrong!", "Try again!");
+                        document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected'));
+                    }
+                }, 500);
+            };
+            optCon.appendChild(btn);
+        });
+        showScreen('quiz-screen');
     }
 
-    function setupMemory() {
+    function setupMemoryGame() {
         const board = document.getElementById('memory-board');
-        board.style.display = 'grid'; board.innerHTML = '';
+        board.innerHTML = '';
         let matches = 0; let flipped = [];
-        const assets = ['tube.png', 'molar.png', 'broken-tooth.png', 'tooth.png'];
+        const assets = ['tooth.png', 'molar.png', 'broken-tooth.png', 'tube.png']; 
         const cards = [...assets, ...assets].sort(() => Math.random() - 0.5);
 
         cards.forEach((filename) => {
             const card = document.createElement('div');
             card.className = 'memory-card'; 
-            card.innerHTML = `<img src="assets/${filename}" alt="Icon">`;
+            // FIX: Directly rendering images without the ternary check
+            const imgHTML = `<img src="assets/${filename}" style="width:60%;">`;
+            card.innerHTML = imgHTML;
+            
             card.onclick = () => {
                 if(flipped.length < 2 && !card.classList.contains('flipped')) {
-                    card.classList.add('flipped'); flipped.push({card, val: filename});
+                    card.classList.add('flipped'); 
+                    flipped.push({card, val: filename});
                     if(flipped.length === 2) {
                         if(flipped[0].val === flipped[1].val) {
                             matches++; flipped = [];
-                            if(matches === 4) document.getElementById('mini-next-btn').disabled = false;
+                            if(matches === 4) {
+                                setTimeout(() => { confetti(); completeLevel(20); }, 500);
+                            }
                         } else {
                             setTimeout(() => { flipped.forEach(f => { f.card.classList.remove('flipped'); }); flipped = []; }, 800);
                         }
@@ -524,114 +729,34 @@
             };
             board.appendChild(card);
         });
+        showScreen('minigame-screen');
     }
 
-    let draggedPiece = null;
-    let touchOffsetX = 0;
-    let touchOffsetY = 0;
-
-    function setupPuzzle() {
-        const board = document.getElementById('puzzle-board');
-        board.style.display = 'block';
-        const container = document.getElementById('p-pieces'); container.innerHTML = '';
-        
-        document.querySelectorAll('.drop-zone').forEach(dz => {
-            dz.innerHTML = '';
-            dz.ondragover = e => e.preventDefault();
-            dz.ondrop = e => handleDrop(e, dz);
-        });
-        
-        const pieces = [1, 2, 3, 4];
-        pieces.sort(()=>Math.random()-.5).forEach(i => {
-            const p = document.createElement('div');
-            p.className = 'puzzle-piece-thumb';
-            p.innerHTML = `<img src="assets/${i}.png" draggable="false">`; 
-            p.dataset.id = i;
-            p.draggable = true;
-            p.ondragstart = (e) => e.dataTransfer.setData('text', i);
-            p.addEventListener('touchstart', handleTouchStart, {passive: false});
-            p.addEventListener('touchmove', handleTouchMove, {passive: false});
-            p.addEventListener('touchend', handleTouchEnd);
-            container.appendChild(p);
-        });
-    }
-
-    function handleTouchStart(e) {
-        e.preventDefault();
-        draggedPiece = e.target.closest('.puzzle-piece-thumb');
-        if(!draggedPiece) return;
-        const touch = e.touches[0];
-        const rect = draggedPiece.getBoundingClientRect();
-        touchOffsetX = touch.clientX - rect.left;
-        touchOffsetY = touch.clientY - rect.top;
-        draggedPiece.style.position = 'fixed'; draggedPiece.style.zIndex = 1000;
-        document.body.append(draggedPiece); 
-        moveAt(touch.clientX, touch.clientY);
-    }
-    function handleTouchMove(e) { e.preventDefault(); if (!draggedPiece) return; moveAt(e.touches[0].clientX, e.touches[0].clientY); }
-    function moveAt(x, y) { if(draggedPiece) { draggedPiece.style.left = x - touchOffsetX + 'px'; draggedPiece.style.top = y - touchOffsetY + 'px'; } }
-    function handleTouchEnd(e) {
-        if (!draggedPiece) return;
-        draggedPiece.style.display = 'none'; 
-        let elemBelow = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-        draggedPiece.style.display = 'flex'; 
-        let slot = elemBelow ? elemBelow.closest('.drop-zone') : null;
-        const id = draggedPiece.dataset.id;
-        if (slot && slot.dataset.s == id) {
-            slot.innerHTML = `<img src="assets/${id}.png" class="puzzle-piece-placed piece-${id}-pos">`;
-            draggedPiece.remove(); checkPuzzleWin();
-        } else {
-            draggedPiece.style.position = 'static'; draggedPiece.style.zIndex = 'auto';
-            document.getElementById('p-pieces').appendChild(draggedPiece);
+    function completeLevel(points) {
+        if(!currentUser.completedLevels.includes(currentLevelId)) {
+            currentUser.completedLevels.push(currentLevelId);
+            currentUser.totalScore += points;
+            
+            sendRequest({
+                action: 'saveProgress',
+                email: currentUser.email,
+                totalScore: currentUser.totalScore,
+                completedLevels: currentUser.completedLevels
+            }, (res) => { console.log("Progress Saved"); });
         }
-        draggedPiece = null;
+        
+        document.getElementById('final-score').innerText = currentUser.totalScore;
+        showScreen('done-screen');
+        renderHome(); 
     }
 
-    function handleDrop(e, dz) { 
-        const id = e.dataTransfer.getData('text');
-        if(dz.dataset.s == id) { 
-            dz.innerHTML = `<img src="assets/${id}.png" class="puzzle-piece-placed piece-${id}-pos">`;
-            const originals = document.querySelectorAll('.puzzle-piece-thumb');
-            originals.forEach(p => { if(p.dataset.id == id) p.remove(); });
-            checkPuzzleWin(); 
-        } 
-    }
-    function checkPuzzleWin() { if(Array.from(document.querySelectorAll('.drop-zone')).every(s => s.hasChildNodes())) document.getElementById('mini-next-btn').disabled = false; }
-
-    function finishMiniGame(btn) {
-        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-        toggleBtnLoading(btn, true);
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'minigame' }) })
-        .then(() => {
-            toggleBtnLoading(btn, false);
-            currentUser.totalScore += 4;
-            startQuiz();
-        });
-    }
-
-    function startQuiz() {
-        const cfg = levelsMap.get(currentLevelId);
-        document.getElementById('q-text').innerText = cfg.question;
-        const optCon = document.getElementById('q-options'); optCon.innerHTML = '';
-        cfg.options.forEach((opt, idx) => {
-            const btn = document.createElement('div'); btn.className = 'quiz-opt'; btn.innerText = opt;
-            btn.onclick = function() { document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected')); this.classList.add('selected'); submitAnswer(idx + 1); };
-            optCon.appendChild(btn);
-        });
-        showScreen('quiz-screen');
-    }
-
-    function submitAnswer(selectedIdx) {
-        document.querySelectorAll('.quiz-opt').forEach(o => o.style.pointerEvents = 'none');
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateScore', email: currentUser.email, levelId: currentLevelId, stage: 'finish', selectedOption: selectedIdx }) })
-        .then(r => r.json()).then(d => {
-            currentUser.totalScore = d.totalScore; currentUser.levels = d.levels;
-            const pts = d.isCorrect ? 10 : 7;
-            document.getElementById('final-score').innerText = pts;
-            if(d.isCorrect) confetti();
-            showScreen('done-screen');
-            renderHome();
-        });
+    function openRewards() { document.getElementById('rewards-dialog').style.display = 'flex'; }
+    function closeRewards() { document.getElementById('rewards-dialog').style.display = 'none'; }
+    function updateRewardsUI() {
+        const s = currentUser.totalScore;
+        if(s >= 50) document.getElementById('rwd-1').classList.add('unlocked');
+        if(s >= 100) document.getElementById('rwd-2').classList.add('unlocked');
+        if(s >= 200) document.getElementById('rwd-3').classList.add('unlocked');
     }
 </script>
 </body>
