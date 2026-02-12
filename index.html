@@ -200,28 +200,44 @@
         display: grid; grid-template-columns: repeat(4, 1fr);
         gap: 10px; width: 100%; padding: 0 25px 25px 25px; 
     }
-    /* UPDATE: Modified to stack icon and text */
+/* UPDATE: Button acts as a container for layers */
     .level-btn {
         aspect-ratio: 1;
         background: linear-gradient(135deg, #0070c0, #0056b3);
         border-radius: 16px;
+        position: relative; /* Essential for overlaying */
         display: flex; 
-        flex-direction: column; /* Stack items vertically */
         justify-content: center; 
         align-items: center;
-        font-size: 18px; font-weight: bold; color: white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+        cursor: pointer;
         border: 1px solid rgba(255,255,255,0.1);
-        gap: 5px; /* Space between icon and number */
+        overflow: hidden;
     }
     
-    /* NEW: Style for the level icon */
+    /* UPDATE: Icon becomes a large background element */
     .level-icon-img {
-        width: 35px; 
-        height: 35px; 
+        position: absolute;
+        width: 85%;  /* Make it big to fill the button */
+        height: 85%;
         object-fit: contain;
-        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+        left: 5px;   /* Slight adjustment to align the crescent */
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;  /* Sit behind the text */
+        opacity: 0.9;
     }
+
+    /* NEW: Style specifically for the Number inside the button */
+    .level-btn span {
+        position: relative;
+        z-index: 3;  /* Sit on top of the image */
+        font-size: 28px; /* Bigger font like the image */
+        font-weight: 800;
+        margin-left: 15px; /* Push slightly right to sit in the crescent curve */
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
     .level-btn.locked { opacity: 0.6; box-shadow: none; pointer-events: none;}
     .level-btn.completed { background: white; border: 2px solid #FFD700; color: #0070c0; }
     .star-img { width: 60%; height: 60%; background: var(--star-icon) no-repeat center; background-size: contain; }
@@ -577,8 +593,7 @@
         });
     }
 
-    // --- 6. RENDER HOME ---
-    function renderHome() {
+function renderHome() {
         document.getElementById('display-name').innerText = currentUser.name;
         document.getElementById('display-score').innerText = currentUser.totalScore;
         const grid = document.getElementById('level-grid'); 
@@ -590,13 +605,18 @@
             
             if (!lvl.isActive) {
                 div.className = 'level-btn locked';
-                div.innerText = lvl.id;
+                // Locked state: Just number (or add icon if you want locked to look same)
+                div.innerHTML = `<span>${lvl.id}</span>`; 
             } else if (isDone) {
                 div.className = 'level-btn completed';
                 div.innerHTML = '<div class="star-img"></div>';
             } else {
                 div.className = 'level-btn';
-                div.innerText = lvl.id;
+                // UPDATE: Structure for overlay
+                div.innerHTML = `
+                    <img src="assets/level_icon.png" class="level-icon-img" alt="icon">
+                    <span>${lvl.id}</span>
+                `;
                 div.onclick = () => startLevel(lvl.id);
             }
             grid.appendChild(div);
@@ -637,7 +657,7 @@
                     <span>Tap to View PDF</span>
                 </div>
             `;
-            btn.innerText = "Finish Level";
+            btn.innerText = "Take Quiz";
             document.getElementById('pdf-trigger').onclick = () => {
                 window.open(cfg.media, '_blank'); 
                 btn.disabled = false;
