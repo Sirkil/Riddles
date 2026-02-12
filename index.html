@@ -76,10 +76,10 @@
 
     /* --- UI ELEMENTS --- */
     .logo {
-        width: 280px; height: 120px;
+        width: 200px; height: 100px; /* Reduced slightly for mobile fit */
         background: var(--logo-image) no-repeat center;
         background-size: contain;
-        margin: 40px 0; flex-shrink: 0;
+        margin: 20px 0; flex-shrink: 0;
     }
 
     .input-group { width: 85%; margin-bottom: 15px; }
@@ -131,7 +131,7 @@
     /* --- NAVIGATION --- */
     .nav-header {
         width: 100%; display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 10px; padding: 0 5px; height: 50px;
+        margin-bottom: 10px; padding: 0 5px; height: 50px; flex-shrink: 0;
     }
     .back-btn {
         background: rgba(255,255,255,0.2); border: none; color: white;
@@ -142,19 +142,19 @@
 
     /* --- TIMER --- */
     .timer-circle {
-        width: 50px; height: 50px;
+        width: 45px; height: 45px;
         background: #0070c0;
         border: 2px solid white;
         border-radius: 50%;
         color: white;
         display: flex; justify-content: center; align-items: center;
-        font-weight: bold; font-size: 18px;
+        font-weight: bold; font-size: 16px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
     /* --- HEADER --- */
     .header-banner {
-        width: 100%; height: 100px; 
+        width: 100%; height: 90px; 
         background: linear-gradient(180deg, #0056b3 0%, #0070c0 100%);
         border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
         position: relative; margin-bottom: 20px; flex-shrink: 0;
@@ -175,17 +175,17 @@
     }
     .user-info { flex: 1; text-align: left; }
     .logo-center {
-        width: 80px; height: 50px;
+        width: 70px; height: 45px;
         background: var(--logo-image) no-repeat center;
-        background-size: contain; flex: 0 0 80px;
+        background-size: contain; flex: 0 0 70px;
     }
     .score-container { flex: 1; display: flex; justify-content: flex-end; align-items: center;}
     .score-pill {
         background: rgba(0, 153, 204, 0.9);
         border: 1px solid rgba(255,255,255,0.5);
-        border-radius: 20px; padding: 6px 14px;
+        border-radius: 20px; padding: 5px 12px;
         display: flex; align-items: center; gap: 6px;
-        font-weight: bold;
+        font-weight: bold; font-size: 14px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
@@ -198,23 +198,36 @@
     /* --- LEVEL GRID --- */
     .level-grid {
         display: grid; grid-template-columns: repeat(4, 1fr);
-        gap: 12px; width: 100%; padding: 0 35px 35px 35px; 
+        gap: 10px; width: 100%; padding: 0 25px 25px 25px; 
     }
+    /* UPDATE: Modified to stack icon and text */
     .level-btn {
         aspect-ratio: 1;
         background: linear-gradient(135deg, #0070c0, #0056b3);
-        border-radius: 20px;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 20px; font-weight: bold; color: white;
+        border-radius: 16px;
+        display: flex; 
+        flex-direction: column; /* Stack items vertically */
+        justify-content: center; 
+        align-items: center;
+        font-size: 18px; font-weight: bold; color: white;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer;
         border: 1px solid rgba(255,255,255,0.1);
+        gap: 5px; /* Space between icon and number */
+    }
+    
+    /* NEW: Style for the level icon */
+    .level-icon-img {
+        width: 35px; 
+        height: 35px; 
+        object-fit: contain;
+        filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
     }
     .level-btn.locked { opacity: 0.6; box-shadow: none; pointer-events: none;}
     .level-btn.completed { background: white; border: 2px solid #FFD700; color: #0070c0; }
-    .star-img { width: 70%; height: 70%; background: var(--star-icon) no-repeat center; background-size: contain; }
+    .star-img { width: 60%; height: 60%; background: var(--star-icon) no-repeat center; background-size: contain; }
 
     /* --- MEMORY GAME --- */
-    .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; width: 100%; }
+    .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; width: 100%; }
     .memory-card { 
         background: #0070c0; aspect-ratio: 1; border-radius: 8px; 
         cursor: pointer; display:flex; justify-content:center; align-items:center; 
@@ -226,39 +239,49 @@
 
     /* --- CONTENT CARDS --- */
     .content-card {
-        background: rgba(255,255,255,0.95); border-radius: 24px; padding: 25px; width: 90%;
-        text-align: center; color: #333; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; width: 95%;
+        text-align: center; color: #333; margin-top: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
     .quiz-opt {
         background: white; border: none; color: #0070c0; 
-        padding: 16px; border-radius: 20px 0 20px 0; width: 100%; margin-bottom: 12px;
-        font-size: 16px; font-weight: bold; cursor: pointer;
+        padding: 14px; border-radius: 16px 0 16px 0; width: 100%; margin-bottom: 10px;
+        font-size: 15px; font-weight: bold; cursor: pointer;
         text-align: center; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: flex; justify-content: center; align-items: center;
+        min-height: 50px; /* Ensure touch target size */
     }
     .quiz-opt:active, .quiz-opt.selected { background: #0070c0; color: white; transform: scale(0.98); }
+    
     .quiz-question-box {
-        background: linear-gradient(135deg, #002244, #0056b3); padding: 25px; border-radius: 16px; 
-        margin-bottom: 25px; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        background: linear-gradient(135deg, #002244, #0056b3); padding: 20px; border-radius: 16px; 
+        margin-bottom: 20px; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        min-height: 80px; display: flex; align-items: center; justify-content: center;
+    }
+    /* RESPONSIVE FONT SIZE FOR QUESTIONS */
+    .quiz-question-box h3 {
+        margin: 0; text-align: center; font-weight: 600; line-height: 1.3;
+        font-size: clamp(14px, 4vw, 18px); /* Scales between 14px and 18px based on screen width */
+        word-wrap: break-word;
     }
 
     /* --- PDF SPECIFIC --- */
     .pdf-link-btn {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         background: #f0f0f0; border: 2px solid #0070c0; border-radius: 16px;
-        padding: 20px; width: 100%; text-decoration: none; color: #0070c0;
-        font-weight: bold; transition: 0.2s; margin: 20px 0; cursor: pointer;
+        padding: 15px; width: 100%; text-decoration: none; color: #0070c0;
+        font-weight: bold; transition: 0.2s; margin: 15px 0; cursor: pointer;
     }
     .pdf-link-btn:active { background: #e0e0e0; transform: scale(0.98); }
-    .pdf-icon-img { width: 50px; height: 50px; margin-bottom: 10px; object-fit: contain; }
+    .pdf-icon-img { width: 40px; height: 40px; margin-bottom: 8px; object-fit: contain; }
 
     /* --- DONE SCREEN --- */
     .done-card {
-        border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 40px 30px; width: 85%;
+        border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 30px 20px; width: 90%;
         text-align: center; background: transparent; box-shadow: none;
     }
     .done-icon-large {
-        width: 120px; height: 120px; background: var(--done-icon) no-repeat center; 
-        background-size: contain; margin: 0 auto 20px auto;
+        width: 100px; height: 100px; background: var(--done-icon) no-repeat center; 
+        background-size: contain; margin: 0 auto 15px auto;
     }
     
     /* --- DIALOGS --- */
@@ -270,7 +293,7 @@
     }
     .dialog-box {
         background: linear-gradient(135deg, #0070c0, #004a99);
-        width: 85%; padding: 30px; border-radius: 24px;
+        width: 85%; padding: 25px; border-radius: 24px;
         text-align: center; border: 1px solid rgba(255,255,255,0.3);
         position: relative;
     }
@@ -279,12 +302,12 @@
         color: white; font-size: 24px; cursor: pointer;
     }
     .reward-item {
-        background: rgba(255,255,255,0.1); margin: 10px 0; padding: 15px;
-        border-radius: 12px; display: flex; align-items: center; gap: 15px;
+        background: rgba(255,255,255,0.1); margin: 8px 0; padding: 12px;
+        border-radius: 12px; display: flex; align-items: center; gap: 12px;
         opacity: 0.5; transition: 0.3s; text-align: left;
     }
     .reward-item.unlocked { opacity: 1; background: rgba(255,255,255,0.2); border: 1px solid #FFD700; }
-    .reward-icon { font-size: 24px; }
+    .reward-icon { font-size: 22px; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
  </style>
@@ -315,12 +338,12 @@
             <div class="header-pattern"></div>
             <div class="header-content">
                 <div class="user-info">
-                    <div style="font-size:14px; opacity:0.8; margin-bottom:2px;">Hello!</div>
-                    <div id="display-name" style="font-size:20px; font-weight:bold; line-height:1.1;">Player</div>
+                    <div style="font-size:13px; opacity:0.8; margin-bottom:2px;">Hello!</div>
+                    <div id="display-name" style="font-size:18px; font-weight:bold; line-height:1.1;">Player</div>
                 </div>
                 <div class="logo-center"></div>
                 <div class="score-container">
-                    <div class="score-pill">
+                    <div class="score-pill" onclick="openRewards()" style="cursor: pointer;">
                         <span>⭐</span> <span id="display-score">0</span>
                     </div>
                 </div>
@@ -353,13 +376,14 @@
     </div>
 
     <div id="quiz-screen" class="screen" style="justify-content:center;">
-        <div class="nav-header" style="position:absolute; top:20px; left:20px; width:auto;">
+        <div class="nav-header">
             <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+            <div id="quiz-timer" class="timer-circle">60</div>
         </div>
 
-        <div class="logo" style="transform:scale(0.7); margin-bottom:20px; margin-top:40px;"></div>
+        <div class="logo" style="transform:scale(0.7); margin-bottom:15px; margin-top:20px;"></div>
         <div class="quiz-question-box">
-            <h3 id="q-text" style="margin:0; text-align:center; font-weight:600; font-size: 18px;">Question?</h3>
+            <h3 id="q-text">Question?</h3>
         </div>
         <div id="q-options" style="width:100%;"></div>
     </div>
@@ -367,15 +391,16 @@
     <div id="minigame-screen" class="screen">
         <div class="nav-header">
             <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+            <div id="memory-timer" class="timer-circle">60</div>
         </div>
         <div class="logo" style="transform:scale(0.7); margin:0 0;"></div>
-        <h2 style="margin: 10px 0;">Memory Match</h2>
+        <h2 style="margin: 10px 0; font-size: 20px;">Memory Match</h2>
         
         <div id="memory-board" class="memory-grid"></div>
     </div>
 
     <div id="done-screen" class="screen" style="justify-content:center;">
-        <div class="logo" style="margin-bottom:40px;"></div>
+        <div class="logo" style="margin-bottom:30px;"></div>
         <div class="done-card">
             <div class="done-icon-large"></div>
             <h1 class="done-text">DONE</h1>
@@ -427,27 +452,28 @@
     // --- 1. CONFIGURATION ---
     const API_URL = "https://script.google.com/macros/s/AKfycbxyAbNkAl7toIm4sGLSP9JBWtbyha4hiPy32crPLBeL3cTrlw5vmUWaSsWDOSxekqeQ/exec"; 
 
+    // Updated: All points are 10.
     const LEVEL_CONFIG = [
         { id: 1, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/1.mp4', unlockTime: 60, points: 10 },
         { id: 2, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/2.mp4', unlockTime: 60, points: 10 },
         { id: 3, isActive: true, type: 'pdf', media: 'https://drive.google.com/file/d/12jWjJs_s-i-KqTfYyLDdyi4dLzVOv9q8/view', unlockTime: 60, question: "Dentine hypersensitivity is often described as?", options: ["Rare condition", "Short, sharp pain", "Permanent issue", "Viral infection"], correct: 2, points: 10 },
-        { id: 4, isActive: true, type: 'pdf', media: 'https://drive.google.com/file/d/1duRSL7VPU7tezXLWnXFiWjx0BzU9LLX-/view', unlockTime: 60, question: "According to MEA experts, screening should be for?", options: ["Only high-risk", "Visible loss", "All patients", "No one"], correct: 3, points: 1105 },
+        { id: 4, isActive: true, type: 'pdf', media: 'https://drive.google.com/file/d/1duRSL7VPU7tezXLWnXFiWjx0BzU9LLX-/view', unlockTime: 60, question: "According to MEA experts, screening should be for?", options: ["Only high-risk", "Visible loss", "All patients", "No one"], correct: 3, points: 10 },
         { id: 5, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/1.mp3', unlockTime: 60, points: 10 },
         { id: 6, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/2.mp3', unlockTime: 60, points: 10 },
         { id: 7, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/3.mp3', unlockTime: 60, points: 10 },
         { id: 8, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/4.mp3', unlockTime: 60, points: 10 },
-        { id: 9, isActive: true, type: 'quiz', question: "What percentage of DH patients typically do NOT mention their condition to dentists?", options: ["10%", "25%", "50%", "75%"], correct: 3, points: 10 },
-        { id: 10, isActive: true, type: 'quiz', question: "Which diagnostic tool is recommended by MEA experts for DH assessment?", options: ["Thermal imaging camera", "Cold air blast test using 3-way syringe", "Electric pulp testing only", "Bitewing radiographs"], correct: 2, points: 10 },
-        { id: 11, isActive: true, type: 'quiz', question: "The Schiff scale score '3' indicates:", options: ["Mild discomfort without request to stop", "No response to stimulus", "Patient requests discontinuation and considers stimulus painful", "Normal sensitivity"], correct: 3, points: 10 },
-        { id: 12, isActive: true, type: 'quiz', question: "The first step in the MEA management algorithm for DH is:", options: ["Laser therapy", "Patient education & behavior modification", "Fluoride varnish", "Gingival grafting"], correct: 2, points: 10 },
-        { id: 13, isActive: true, type: 'quiz', question: "According to the content, DH negatively impacts patients' quality of life by:", options: ["Improving oral hygiene habits", "Affecting emotional, social, and functional aspects", "Increasing appetite", "Reducing dental visits"], correct: 2, points: 10 },
-        { id: 14, isActive: true, type: 'quiz', question: "A key barrier preventing proper DH diagnosis is:", options: ["Excessive diagnostic time", "Overestimation of DH importance", "Lack of proactive screening", "High cost of diagnostic tools"], correct: 3, points: 10 },
-        { id: 15, isActive: true, type: 'quiz', question: "For asymptomatic patients who answer 'NO' to sensitivity, the next step is:", options: ["Start immediate in-office treatment", "Use the DHEQ-15 questionnaire", "Perform cold air blast test", "No further evaluation"], correct: 2, points: 10 },
-        { id: 16, isActive: true, type: 'quiz', question: "DH tends to reoccur if:", options: ["The patient uses only water flossers", "Desensitizing agents are discontinued", "Fluoride toothpaste is used daily", "Patients consume hot beverages"], correct: 3, points: 10 },
-        { id: 17, isActive: true, type: 'quiz', question: "Question 1: Based on the Schiff scale, what score best represents her response?", options: ["0 – No response", "Responds but does not request discontinuation", "2 – Moves away or requests discontinuation", "Severe pain and immediate discontinuation"], correct: 4, points: 10 },
-        { id: 18, isActive: true, type: 'quiz', question: "Question 2: According to the MEA DH algorithm, what is the next recommended step?", options: ["Begin desensitizing toothpaste immediately", "Administer the DHEQ-15 questionnaire", "Conduct a cold air blast test", "No further evaluation required"], correct: 2, points: 10 },
-        { id: 19, isActive: true, type: 'quiz', question: "Question 3: Where should this patient be placed in the stepwise DH management approach?", options: ["Step 1 – Patient education & behavior modification", "Step 2 – Continue home-based toothpaste", "Step 3 – In-office treatments (varnish, laser)", "Step 4 – Multidisciplinary referral"], correct: 3, points: 10 },
-        { id: 20, isActive: true, type: 'memory', points: 10 }
+        { id: 9, isActive: true, type: 'quiz', question: "What percentage of DH patients typically do NOT mention their condition to dentists?", options: ["10%", "25%", "50%", "75%"], correct: 3, unlockTime: 60,points: 10 },
+        { id: 10, isActive: true, type: 'quiz', question: "Which diagnostic tool is recommended by MEA experts for DH assessment?", options: ["Thermal imaging camera", "Cold air blast test using 3-way syringe", "Electric pulp testing only", "Bitewing radiographs"], correct: 2, unlockTime: 60,points: 10 },
+        { id: 11, isActive: true, type: 'quiz', question: "The Schiff scale score '3' indicates:", options: ["Mild discomfort without request to stop", "No response to stimulus", "Patient requests discontinuation and considers stimulus painful", "Normal sensitivity"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 12, isActive: true, type: 'quiz', question: "The first step in the MEA management algorithm for DH is:", options: ["Laser therapy", "Patient education & behavior modification", "Fluoride varnish", "Gingival grafting"], correct: 2,unlockTime: 60, points: 10 },
+        { id: 13, isActive: true, type: 'quiz', question: "According to the content, DH negatively impacts patients' quality of life by:", options: ["Improving oral hygiene habits", "Affecting emotional, social, and functional aspects", "Increasing appetite", "Reducing dental visits"], correct: 2,unlockTime: 60, points: 10 },
+        { id: 14, isActive: true, type: 'quiz', question: "A key barrier preventing proper DH diagnosis is:", options: ["Excessive diagnostic time", "Overestimation of DH importance", "Lack of proactive screening", "High cost of diagnostic tools"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 15, isActive: true, type: 'quiz', question: "For asymptomatic patients who answer 'NO' to sensitivity, the next step is:", options: ["Start immediate in-office treatment", "Use the DHEQ-15 questionnaire", "Perform cold air blast test", "No further evaluation"], correct: 2,unlockTime: 60, points: 10 },
+        { id: 16, isActive: true, type: 'quiz', question: "DH tends to reoccur if:", options: ["The patient uses only water flossers", "Desensitizing agents are discontinued", "Fluoride toothpaste is used daily", "Patients consume hot beverages"], correct: 3, unlockTime: 60,points: 10 },
+        { id: 17, isActive: true, type: 'quiz', question: "Case 1:A 32-year-old patient reports sharp, short pain when drinking cold water. She assumed it was normal and never mentioned it. Clinical exam shows no caries or fractures. Cold air blast test triggers immediate pain and she requests discontinuation.\nQuestion 1: Based on the Schiff scale, what score best represents her response?", options: ["0 – No response", "Responds but does not request discontinuation", "2 – Moves away or requests discontinuation", "Severe pain and immediate discontinuation"], correct: 4,unlockTime: 60, points: 10 },
+        { id: 18, isActive: true, type: 'quiz', question: "Case 2:A 45-year-old male presents for routine cleaning. When asked, 'Do you have sensitive teeth?' he answers 'No.' Mild cervical abrasion is present. No prior use of desensitizing toothpaste.\nQuestion 2: According to the MEA DH algorithm, what is the next recommended step?", options: ["Begin desensitizing toothpaste immediately", "Administer the DHEQ-15 questionnaire", "Conduct a cold air blast test", "No further evaluation required"], correct: 2,unlockTime: 60, points: 10 },
+        { id: 19, isActive: true, type: 'quiz', question: "Case 3:A 50-year-old patient has used desensitizing toothpaste twice daily for 4 weeks with mild improvement. Still experiences pain with ice cream. No pulpitis or mimicking conditions.\nQuestion 3: Where should this patient be placed in the stepwise DH management approach?", options: ["Step 1 – Patient education & behavior modification", "Step 2 – Continue home-based toothpaste", "Step 3 – In-office treatments (varnish, laser)", "Step 4 – Multidisciplinary referral"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 20, isActive: true, type: 'memory', unlockTime: 60, points: 10 }
     ];
 
     // --- 2. APP STATE ---
@@ -466,11 +492,23 @@
     }
 
     // --- DIALOGS (REPLACING ALERTS) ---
-    function showAlert(title, msg) {
+    function showAlert(title, msg, callback) {
         document.getElementById('alert-title').innerText = title;
         document.getElementById('alert-msg').innerText = msg;
-        document.getElementById('custom-alert').style.display = 'flex';
+        const alertBox = document.getElementById('custom-alert');
+        alertBox.style.display = 'flex';
+        
+        // Ensure old event listeners don't stack
+        const btn = alertBox.querySelector('.btn');
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.onclick = () => {
+            closeCustomAlert();
+            if(callback) callback();
+        };
     }
+    
     function closeCustomAlert() {
         document.getElementById('custom-alert').style.display = 'none';
     }
@@ -495,24 +533,21 @@
         });
     }
 
-    // --- 5. AUTH LOGIC (Updated Flow) ---
+    // --- 5. AUTH LOGIC ---
     function handleAuth(btn) {
         const email = document.getElementById('login-email').value.trim();
         if(!email) return showAlert("Error", "Please enter your email.");
 
         btn.innerText = "Loading...";
         
-        // Check if user exists (Login Action)
         sendRequest({ action: 'login', email: email }, (res) => {
             if(res.status === 'success') {
-                // User Exists -> Go to Game
                 currentUser = res.user;
                 renderHome();
                 showScreen('home-screen');
                 btn.innerText = "Next";
             } else if (res.status === 'not_found') {
-                // User New -> Go to Register
-                document.getElementById('reg-email-hidden').value = email; // Pass email
+                document.getElementById('reg-email-hidden').value = email; 
                 showScreen('register-screen');
                 btn.innerText = "Next";
             } else {
@@ -525,7 +560,7 @@
     function handleRegister(btn) {
         const name = document.getElementById('reg-name').value;
         const phone = document.getElementById('reg-phone').value;
-        const email = document.getElementById('reg-email-hidden').value; // Get hidden email
+        const email = document.getElementById('reg-email-hidden').value; 
         
         if(!name || !phone) return showAlert("Error", "Please fill all details.");
         
@@ -542,7 +577,7 @@
         });
     }
 
-    // --- 6. RENDER HOME (UPDATED: Standalone Levels) ---
+    // --- 6. RENDER HOME ---
     function renderHome() {
         document.getElementById('display-name').innerText = currentUser.name;
         document.getElementById('display-score').innerText = currentUser.totalScore;
@@ -553,21 +588,13 @@
             const div = document.createElement('div');
             const isDone = currentUser.completedLevels.includes(lvl.id);
             
-            // NEW LOGIC: 
-            // 1. If isActive is FALSE -> LOCKED (Always).
-            // 2. If isActive is TRUE -> UNLOCKED (Playable).
-            // 3. If Done -> Show Star (Visual only).
-
             if (!lvl.isActive) {
-                // Manually Closed
                 div.className = 'level-btn locked';
                 div.innerText = lvl.id;
             } else if (isDone) {
-                // Completed
                 div.className = 'level-btn completed';
                 div.innerHTML = '<div class="star-img"></div>';
             } else {
-                // Active & Not Done -> Playable (Standalone)
                 div.className = 'level-btn';
                 div.innerText = lvl.id;
                 div.onclick = () => startLevel(lvl.id);
@@ -588,7 +615,7 @@
         } else if (cfg.type === 'quiz') {
             setupQuizScreen(cfg);
         } else if (cfg.type === 'memory') {
-            setupMemoryGame();
+            setupMemoryGame(cfg); 
         }
     }
 
@@ -601,7 +628,6 @@
         iconCon.innerHTML = ''; contentArea.innerHTML = '';
         btn.disabled = true; btn.classList.add('disabled');
         
-        // --- PDF LOGIC ---
         if(cfg.type === 'pdf') {
             timerDisplay.innerText = "--";
             contentArea.innerHTML = `
@@ -611,34 +637,28 @@
                     <span>Tap to View PDF</span>
                 </div>
             `;
-            btn.innerText = "Take Quiz";
-            
-            // Redirect to Link provided in config
+            btn.innerText = "Finish Level";
             document.getElementById('pdf-trigger').onclick = () => {
                 window.open(cfg.media, '_blank'); 
                 btn.disabled = false;
                 btn.classList.remove('disabled');
             };
-            
             btn.onclick = () => setupQuizScreen(cfg); 
             showScreen('media-screen');
             return;
         }
 
-        // --- AUDIO/VIDEO LOGIC ---
         let iconClass = cfg.type === 'video' ? 'fa-video' : 'fa-headphones';
         iconCon.innerHTML = `<i class="fas ${iconClass}" style="font-size:50px; color:#0070c0;"></i>`;
         
         if(cfg.type === 'video') {
-            // Updated to use actual HTML5 Video
             contentArea.innerHTML = `
-                <video width="100%" height="200" controls autoplay style="border-radius:10px; background:black;">
+                <video width="100%" height="200" controls autoplay style="border-radius:10px; background:black; max-width:100%;">
                     <source src="${cfg.media}" type="video/mp4">
                     Your browser does not support video.
                 </video>
             `;
         } else {
-             // Updated to use actual HTML5 Audio
              contentArea.innerHTML = `
                 <div style="background:#eee; padding:20px; border-radius:30px; margin-top:10px;">
                     <audio controls autoplay style="width:100%;">
@@ -652,7 +672,6 @@
         btn.onclick = () => completeLevel(cfg.points);
         showScreen('media-screen');
 
-        // Timer
         let timeLeft = cfg.unlockTime || 10;
         timerDisplay.innerText = timeLeft;
         if(timerInterval) clearInterval(timerInterval);
@@ -678,26 +697,45 @@
             btn.className = 'quiz-opt'; 
             btn.innerText = opt;
             btn.onclick = function() { 
+                // Disable all buttons to prevent multiple clicks
+                document.querySelectorAll('.quiz-opt').forEach(b => b.style.pointerEvents = 'none');
+                
                 document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected')); 
                 this.classList.add('selected'); 
                 
                 setTimeout(() => {
                     const isCorrect = (idx + 1) === cfg.correct;
                     if(isCorrect) {
+                        // Correct: Points + Confetti + Complete
                         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                        completeLevel(cfg.points);
+                        completeLevel(10); // Add 10 points
                     } else {
-                        showAlert("Wrong!", "Try again!");
-                        document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected'));
+                        // Wrong: No Points + Alert + Complete (Game Over for this level)
+                        showAlert("Wrong Answer!", "You earned 0 points for this level.", () => {
+                           completeLevel(0); // Add 0 points
+                        });
                     }
                 }, 500);
             };
             optCon.appendChild(btn);
         });
+
+        // Timer Display Only
+        const timerDisplay = document.getElementById('quiz-timer');
+        let timeLeft = cfg.unlockTime || 60;
+        timerDisplay.innerText = timeLeft;
+        if(timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            if(timeLeft > 0) timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if(timeLeft <= 0) clearInterval(timerInterval);
+        }, 1000);
+
         showScreen('quiz-screen');
     }
 
-    function setupMemoryGame() {
+    function setupMemoryGame(cfg) { 
         const board = document.getElementById('memory-board');
         board.innerHTML = '';
         let matches = 0; let flipped = [];
@@ -707,7 +745,6 @@
         cards.forEach((filename) => {
             const card = document.createElement('div');
             card.className = 'memory-card'; 
-            // FIX: Directly rendering images without the ternary check
             const imgHTML = `<img src="assets/${filename}" style="width:60%;">`;
             card.innerHTML = imgHTML;
             
@@ -719,7 +756,7 @@
                         if(flipped[0].val === flipped[1].val) {
                             matches++; flipped = [];
                             if(matches === 4) {
-                                setTimeout(() => { confetti(); completeLevel(20); }, 500);
+                                setTimeout(() => { confetti(); completeLevel(10); }, 500); // Updated to 10 points
                             }
                         } else {
                             setTimeout(() => { flipped.forEach(f => { f.card.classList.remove('flipped'); }); flipped = []; }, 800);
@@ -729,13 +766,25 @@
             };
             board.appendChild(card);
         });
+
+        const timerDisplay = document.getElementById('memory-timer');
+        let timeLeft = (cfg && cfg.unlockTime) ? cfg.unlockTime : 60;
+        timerDisplay.innerText = timeLeft;
+        if(timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            if(timeLeft > 0) timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if(timeLeft <= 0) clearInterval(timerInterval);
+        }, 1000);
+
         showScreen('minigame-screen');
     }
 
-    function completeLevel(points) {
+    function completeLevel(pointsToAdd) {
         if(!currentUser.completedLevels.includes(currentLevelId)) {
             currentUser.completedLevels.push(currentLevelId);
-            currentUser.totalScore += points;
+            currentUser.totalScore += pointsToAdd; // Cumulative Score Logic
             
             sendRequest({
                 action: 'saveProgress',
