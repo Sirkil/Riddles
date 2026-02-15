@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Sensodyne Ramadan Riddles</title>
-
-<meta name="facebook-domain-verification" content="dwvpwdmxqhno4d5no67ck5r2q4q1dg" />
-
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
  <style>
@@ -131,18 +128,6 @@
         color: #00d2ff; text-decoration: underline; cursor: pointer; margin-top: 15px; font-size: 14px;
     }
 
-    /* --- LEGAL FOOTER STYLE --- */
-    .legal-footer {
-        margin-top: auto;
-        padding: 15px;
-        text-align: center;
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.5);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        width: 100%;
-    }
-    .legal-footer a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
-
     /* --- NAVIGATION --- */
     .nav-header {
         width: 100%; display: flex; justify-content: space-between; align-items: center;
@@ -207,7 +192,7 @@
     /* --- HOME ACTIONS --- */
     .home-actions {
         display: flex; gap: 10px; width: 90%; justify-content: center;
-        margin-top: 10px; margin-bottom: 10px;
+        margin-top: 10px; margin-bottom: 40px;
     }
 
     /* --- LEVEL GRID --- */
@@ -215,11 +200,12 @@
         display: grid; grid-template-columns: repeat(4, 1fr);
         gap: 10px; width: 100%; padding: 0 25px 25px 25px; 
     }
+/* UPDATE: Button acts as a container for layers */
     .level-btn {
         aspect-ratio: 1;
         background: linear-gradient(135deg, #0070c0, #0056b3);
         border-radius: 16px;
-        position: relative;
+        position: relative; /* Essential for overlaying */
         display: flex; 
         justify-content: center; 
         align-items: center;
@@ -229,24 +215,26 @@
         overflow: hidden;
     }
     
+    /* UPDATE: Icon becomes a large background element */
     .level-icon-img {
         position: absolute;
-        width: 85%;
+        width: 85%;  /* Make it big to fill the button */
         height: 85%;
         object-fit: contain;
-        left: 5px;
+        left: 5px;   /* Slight adjustment to align the crescent */
         top: 50%;
         transform: translateY(-50%);
-        z-index: 1;
+        z-index: 1;  /* Sit behind the text */
         opacity: 0.9;
     }
 
+    /* NEW: Style specifically for the Number inside the button */
     .level-btn span {
         position: relative;
-        z-index: 3;
-        font-size: 28px;
+        z-index: 3;  /* Sit on top of the image */
+        font-size: 28px; /* Bigger font like the image */
         font-weight: 800;
-        margin-left: 15px;
+        margin-left: 15px; /* Push slightly right to sit in the crescent curve */
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
@@ -276,7 +264,7 @@
         font-size: 15px; font-weight: bold; cursor: pointer;
         text-align: center; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         display: flex; justify-content: center; align-items: center;
-        min-height: 50px;
+        min-height: 50px; /* Ensure touch target size */
     }
     .quiz-opt:active, .quiz-opt.selected { background: #0070c0; color: white; transform: scale(0.98); }
     
@@ -285,10 +273,10 @@
         margin-bottom: 20px; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         min-height: 80px; display: flex; align-items: center; justify-content: center;
     }
-    
+    /* RESPONSIVE FONT SIZE FOR QUESTIONS */
     .quiz-question-box h3 {
         margin: 0; text-align: center; font-weight: 600; line-height: 1.3;
-        font-size: clamp(14px, 4vw, 18px);
+        font-size: clamp(14px, 4vw, 18px); /* Scales between 14px and 18px based on screen width */
         word-wrap: break-word;
     }
 
@@ -349,11 +337,6 @@
         <h3 style="margin-bottom:15px;">Welcome</h3>
         <div class="input-group"><input type="email" id="login-email" placeholder="Enter your Email"></div>
         <button class="btn" onclick="handleAuth(this)">Next</button>
-        
-        <div class="legal-footer">
-            Official Campaign managed by Sirkil Technology for Sensodyne Egypt.<br>
-            <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
-        </div>
     </div>
 
     <div id="register-screen" class="screen" style="justify-content: center;">
@@ -388,10 +371,6 @@
         <div class="home-actions">
             <button class="btn" style="flex: 2; margin-top:0;" onclick="openRewards()">Rewards</button>
             <button class="btn btn-secondary btn-icon-only" style="margin-top:0;" onclick="handleLogout()"><i class="fa fa-sign-out-alt"></i></button>
-        </div>
-
-        <div class="legal-footer" style="margin-top:20px;">
-            Powered by Sirkil Technology for Sensodyne Egypt.
         </div>
     </div>
 
