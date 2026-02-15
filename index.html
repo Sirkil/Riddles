@@ -28,6 +28,7 @@
         --header-pattern: url('assets/top_pattern.png'); 
         --star-icon: url('assets/star_icon.png'); 
         --done-icon: url('assets/done_icon.png'); 
+        --claim-stamp: url('assets/claim_stamp.png');
     }
 
     /* --- GLOBAL STYLES --- */
@@ -56,7 +57,6 @@
         flex-direction: column;
         overflow-y: auto;
         padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
         scrollbar-width: none; 
         -ms-overflow-style: none;
     }
@@ -67,16 +67,49 @@
         flex-direction: column;
         align-items: center;
         width: 100%;
-        min-height: 100%;
+        flex: 1; 
         padding: 20px;
         animation: fadeIn 0.4s ease-in-out;
         position: relative;
     }
     .screen.active { display: flex; }
 
+    /* --- FOOTER --- */
+    .app-footer {
+        width: 100%;
+        padding: 15px 25px;
+        text-align: center;
+        background: linear-gradient(to bottom, var(--dark-blue), #00224400);
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 14px;
+        font-weight: normal;
+        letter-spacing: 0.5px;
+        flex-shrink: 0; 
+        border-top: 2px solid rgba(255, 255, 255, 0.25);
+        padding-bottom: calc(15px + env(safe-area-inset-bottom)); 
+        direction: rtl; 
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        transition: display 0.2s; /* Smooth transition support */
+    }
+
+    /* --- NEW STAMP STYLE --- */
+    .claim-stamp {
+        position: absolute;
+        bottom: 90px;
+        left: 140px;
+        width: 150px;
+        height: 150px;
+        background: var(--claim-stamp) no-repeat center;
+        background-size: contain;
+        z-index: 50;
+        pointer-events: none; /* Allows clicking items behind it */
+        display: none; /* Hidden by default */
+        opacity: 1;
+    }
+
     /* --- UI ELEMENTS --- */
     .logo {
-        width: 200px; height: 100px; /* Reduced slightly for mobile fit */
+        width: 300px; height: 120px; 
         background: var(--logo-image) no-repeat center;
         background-size: contain;
         margin: 20px 0; flex-shrink: 0;
@@ -175,9 +208,10 @@
     }
     .user-info { flex: 1; text-align: left; }
     .logo-center {
-        width: 70px; height: 45px;
+        width: 100px;
+        height: 65px;
         background: var(--logo-image) no-repeat center;
-        background-size: contain; flex: 0 0 70px;
+        background-size: contain; flex: 0 0 100px;
     }
     .score-container { flex: 1; display: flex; justify-content: flex-end; align-items: center;}
     .score-pill {
@@ -200,12 +234,12 @@
         display: grid; grid-template-columns: repeat(4, 1fr);
         gap: 10px; width: 100%; padding: 0 25px 25px 25px; 
     }
-/* UPDATE: Button acts as a container for layers */
+
     .level-btn {
         aspect-ratio: 1;
         background: linear-gradient(135deg, #0070c0, #0056b3);
         border-radius: 16px;
-        position: relative; /* Essential for overlaying */
+        position: relative; 
         display: flex; 
         justify-content: center; 
         align-items: center;
@@ -215,26 +249,24 @@
         overflow: hidden;
     }
     
-    /* UPDATE: Icon becomes a large background element */
     .level-icon-img {
         position: absolute;
-        width: 85%;  /* Make it big to fill the button */
+        width: 85%;  
         height: 85%;
         object-fit: contain;
-        left: 5px;   /* Slight adjustment to align the crescent */
+        left: 5px;   
         top: 50%;
         transform: translateY(-50%);
-        z-index: 1;  /* Sit behind the text */
+        z-index: 1;  
         opacity: 0.9;
     }
 
-    /* NEW: Style specifically for the Number inside the button */
     .level-btn span {
         position: relative;
-        z-index: 3;  /* Sit on top of the image */
-        font-size: 28px; /* Bigger font like the image */
+        z-index: 3;  
+        font-size: 28px; 
         font-weight: 800;
-        margin-left: 15px; /* Push slightly right to sit in the crescent curve */
+        margin-left: 15px; 
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
@@ -264,7 +296,7 @@
         font-size: 15px; font-weight: bold; cursor: pointer;
         text-align: center; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         display: flex; justify-content: center; align-items: center;
-        min-height: 50px; /* Ensure touch target size */
+        min-height: 50px; 
     }
     .quiz-opt:active, .quiz-opt.selected { background: #0070c0; color: white; transform: scale(0.98); }
     
@@ -273,10 +305,9 @@
         margin-bottom: 20px; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         min-height: 80px; display: flex; align-items: center; justify-content: center;
     }
-    /* RESPONSIVE FONT SIZE FOR QUESTIONS */
     .quiz-question-box h3 {
         margin: 0; text-align: center; font-weight: 600; line-height: 1.3;
-        font-size: clamp(14px, 4vw, 18px); /* Scales between 14px and 18px based on screen width */
+        font-size: clamp(14px, 4vw, 18px); 
         word-wrap: break-word;
     }
 
@@ -354,8 +385,8 @@
             <div class="header-pattern"></div>
             <div class="header-content">
                 <div class="user-info">
-                    <div style="font-size:13px; opacity:0.8; margin-bottom:2px;">Hello!</div>
-                    <div id="display-name" style="font-size:18px; font-weight:bold; line-height:1.1;">Player</div>
+                    <div style="font-size:12px; opacity:0.8; margin-bottom:2px;">Hello!</div>
+                    <div id="display-name" style="font-size:14px; font-weight:bold; line-height:1.1;">Player</div>
                 </div>
                 <div class="logo-center"></div>
                 <div class="score-container">
@@ -369,7 +400,7 @@
         <div class="level-grid" id="level-grid"></div>
 
         <div class="home-actions">
-            <button class="btn" style="flex: 2; margin-top:0;" onclick="openRewards()">Rewards</button>
+            <button class="btn" style="flex: 2; margin-top:0;" onclick="openRewards()">Giveaways</button>
             <button class="btn btn-secondary btn-icon-only" style="margin-top:0;" onclick="handleLogout()"><i class="fa fa-sign-out-alt"></i></button>
         </div>
     </div>
@@ -424,23 +455,26 @@
             <button class="btn" style="width:100%;" onclick="showScreen('home-screen')">OK</button>
         </div>
     </div>
+
+    <div id="claim-stamp" class="claim-stamp"></div>
+
+    <div class="app-footer">
+        ثابت علمياً راحة فعالة من ألم حساسية الأسنان في ٦٠ ثانية
+    </div>
+
 </div>
 
 <div id="rewards-dialog" class="dialog-overlay" onclick="closeRewards()">
     <div class="dialog-box" onclick="event.stopPropagation()">
         <span class="close-dialog" onclick="closeRewards()">&times;</span>
-        <h2 style="margin-top:0; color:white;">Your Rewards</h2>
+        <h2 style="margin-top:0; color:white;">Your Giveaways</h2>
         <div class="reward-item" id="rwd-1">
-            <div class="reward-icon">🧢</div>
-            <div><b>Cap</b><br><span style="font-size:12px;">Earn 50 points</span></div>
+            <div class="reward-icon">🔒</div>
+            <div><b>Giveaway 1</b><br><span style="font-size:12px;">Earn 100 points</span></div>
         </div>
         <div class="reward-item" id="rwd-2">
-            <div class="reward-icon">🧴</div>
-            <div><b>Lotion</b><br><span style="font-size:12px;">Earn 100 points</span></div>
-        </div>
-        <div class="reward-item" id="rwd-3">
-            <div class="reward-icon">🎹</div>
-            <div><b>Grand Prize</b><br><span style="font-size:12px;">Earn 200 points</span></div>
+            <div class="reward-icon">🔒</div>
+            <div><b>Giveaway 2</b><br><span style="font-size:12px;">Earn 200 points</span></div>
         </div>
     </div>
 </div>
@@ -472,23 +506,23 @@
     const LEVEL_CONFIG = [
         { id: 1, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/1.mp4', unlockTime: 60, points: 10 },
         { id: 2, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/2.mp4', unlockTime: 60, points: 10 },
-        { id: 3, isActive: true, type: 'pdf', media: 'https://www.weebly.com/uploads/2/3/2/2/23222332/custom_themes/464933049751344157/files/sensodyne/Algorithm_V5RGY.pdf', unlockTime: 60, question: "Dentine hypersensitivity is often described as?", options: ["Rare condition", "Short, sharp pain", "Permanent issue", "Viral infection"], correct: 2, points: 10 },
-        { id: 4, isActive: true, type: 'pdf', media: 'https://www.weebly.com/uploads/2/3/2/2/23222332/custom_themes/464933049751344157/files/sensodyne/DentineHypersensitivityQuestionnaire-EGY.pdf', unlockTime: 60, question: "According to MEA experts, screening should be for?", options: ["Only high-risk", "Visible loss", "All patients", "No one"], correct: 3, points: 10 },
-        { id: 5, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/1.mp3', unlockTime: 60, points: 10 },
-        { id: 6, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/2.mp3', unlockTime: 60, points: 10 },
-        { id: 7, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/3.mp3', unlockTime: 60, points: 10 },
-        { id: 8, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/4.mp3', unlockTime: 60, points: 10 },
-        { id: 9, isActive: true, type: 'quiz', question: "What percentage of DH patients typically do NOT mention their condition to dentists?", options: ["10%", "25%", "50%", "75%"], correct: 3, unlockTime: 60,points: 10 },
-        { id: 10, isActive: true, type: 'quiz', question: "Which diagnostic tool is recommended by MEA experts for DH assessment?", options: ["Thermal imaging camera", "Cold air blast test using 3-way syringe", "Electric pulp testing only", "Bitewing radiographs"], correct: 2, unlockTime: 60,points: 10 },
+        { id: 3, isActive: true, type: 'pdf', media: 'https://www.weebly.com/uploads/2/3/2/2/23222332/custom_themes/464933049751344157/files/sensodyne/Algorithm_V5RGY.pdf', unlockTime: 60, question: "Sensodyne Rapid action provides Dentine Hypersensitivity relief in", options: ["60 Seconds", "2 minutes", "1 hour", "2 days"], correct: 1, points: 10 },
+        { id: 4, isActive: true, type: 'pdf', media: 'https://riddles-1zcx.onrender.com/Sensodyne%20LB1%20_Rapid_EG_whatsapp%20FINAL.pdf', unlockTime: 60, question: "Percentages of Egyptians suffering from Dentine Hypersensitivity", options: ["30%", "50%", "64%", "10%"], correct: 3, points: 10 },
+        { id: 5, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%201%20-%20Dr%20Manal%20Awad%20-%20Dentine%20Hypersensitivity%20Demystified.mp3', unlockTime: 60, points: 10 },
+        { id: 6, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%204%20-%20Dr%20Samira%20Osailan%2C%20Dr%20Aslan%20Gokbuget%20-%20Team%20Effort%20The%20Multidisciplinary%20Approach%20to%20DH.mp3', unlockTime: 60, points: 10 },
+        { id: 7, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%207%20-%20Dr%20Nour%20Habib%20-%20Winning%20A-Z%20Strategies%20for%20Managing%20DH.mp3', unlockTime: 60, points: 10 },
+        { id: 8, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding Dentine Discussions podcast series - Episode 8 - Dr Hesham Marei - The DH Challenge Myths and Realities.mp3', unlockTime: 60, points: 10 },
+        { id: 9, isActive: true, type: 'quiz', question: "According to MEA experts (2024), DH screening should be performed for:", options: ["Only high-risk patients", "Patients with visible enamel loss", "All patients visiting dental clinics", "Patients complaining of toothache"], correct: 3, unlockTime: 60,points: 10 },
+        { id: 10, isActive: true, type: 'quiz', question: "What percentage of DH patients typically do NOT mention their condition to dentists?", options: ["10%", "25%", "50%", "75%"], correct: 3, unlockTime: 60,points: 10 },
         { id: 11, isActive: true, type: 'quiz', question: "The Schiff scale score '3' indicates:", options: ["Mild discomfort without request to stop", "No response to stimulus", "Patient requests discontinuation and considers stimulus painful", "Normal sensitivity"], correct: 3,unlockTime: 60, points: 10 },
         { id: 12, isActive: true, type: 'quiz', question: "The first step in the MEA management algorithm for DH is:", options: ["Laser therapy", "Patient education & behavior modification", "Fluoride varnish", "Gingival grafting"], correct: 2,unlockTime: 60, points: 10 },
         { id: 13, isActive: true, type: 'quiz', question: "According to the content, DH negatively impacts patients' quality of life by:", options: ["Improving oral hygiene habits", "Affecting emotional, social, and functional aspects", "Increasing appetite", "Reducing dental visits"], correct: 2,unlockTime: 60, points: 10 },
         { id: 14, isActive: true, type: 'quiz', question: "A key barrier preventing proper DH diagnosis is:", options: ["Excessive diagnostic time", "Overestimation of DH importance", "Lack of proactive screening", "High cost of diagnostic tools"], correct: 3,unlockTime: 60, points: 10 },
-        { id: 15, isActive: true, type: 'quiz', question: "For asymptomatic patients who answer 'NO' to sensitivity, the next step is:", options: ["Start immediate in-office treatment", "Use the DHEQ-15 questionnaire", "Perform cold air blast test", "No further evaluation"], correct: 2,unlockTime: 60, points: 10 },
-        { id: 16, isActive: true, type: 'quiz', question: "DH tends to reoccur if:", options: ["The patient uses only water flossers", "Desensitizing agents are discontinued", "Fluoride toothpaste is used daily", "Patients consume hot beverages"], correct: 3, unlockTime: 60,points: 10 },
-        { id: 17, isActive: true, type: 'quiz', question: "Case 1:A 32-year-old patient reports sharp, short pain when drinking cold water. She assumed it was normal and never mentioned it. Clinical exam shows no caries or fractures. Cold air blast test triggers immediate pain and she requests discontinuation.\nQuestion 1: Based on the Schiff scale, what score best represents her response?", options: ["0 – No response", "Responds but does not request discontinuation", "2 – Moves away or requests discontinuation", "Severe pain and immediate discontinuation"], correct: 4,unlockTime: 60, points: 10 },
-        { id: 18, isActive: true, type: 'quiz', question: "Case 2:A 45-year-old male presents for routine cleaning. When asked, 'Do you have sensitive teeth?' he answers 'No.' Mild cervical abrasion is present. No prior use of desensitizing toothpaste.\nQuestion 2: According to the MEA DH algorithm, what is the next recommended step?", options: ["Begin desensitizing toothpaste immediately", "Administer the DHEQ-15 questionnaire", "Conduct a cold air blast test", "No further evaluation required"], correct: 2,unlockTime: 60, points: 10 },
-        { id: 19, isActive: true, type: 'quiz', question: "Case 3:A 50-year-old patient has used desensitizing toothpaste twice daily for 4 weeks with mild improvement. Still experiences pain with ice cream. No pulpitis or mimicking conditions.\nQuestion 3: Where should this patient be placed in the stepwise DH management approach?", options: ["Step 1 – Patient education & behavior modification", "Step 2 – Continue home-based toothpaste", "Step 3 – In-office treatments (varnish, laser)", "Step 4 – Multidisciplinary referral"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 15, isActive: true, type: 'quiz', question: "For asymptomatic patients who answer 'NO' to sensitivity, the next step is:", options: ["Start immediate in-office treatment", "Use the DHEQ-15 questionnaire", "Perform cold air blast test", "No further evaluation"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 16, isActive: true, type: 'quiz', question: "DH tends to reoccur if:", options: ["The patient uses only water flossers", "Desensitizing agents are discontinued", "Fluoride toothpaste is used daily", "Patients consume hot beverages"], correct: 2, unlockTime: 60,points: 10 },
+        { id: 17, isActive: true, type: 'quiz', question: "Case 1:A 32-year-old patient reports sharp, short pain when drinking cold water. She assumed it was normal and never mentioned it. Clinical exam shows no caries or fractures. Cold air blast test triggers immediate pain and she requests discontinuation.\nQuestion 1: Based on the Schiff scale, what score best represents her response?", options: ["No response", "Responds but does not request discontinuation", "Moves away or requests discontinuation", "Severe pain and immediate discontinuation"], correct: 4,unlockTime: 60, points: 10 },
+        { id: 18, isActive: true, type: 'quiz', question: "Case 2:A 45-year-old male presents for routine cleaning. When asked, 'Do you have sensitive teeth?' he answers 'No.' Mild cervical abrasion is present. No prior use of desensitizing toothpaste.\nQuestion 2: According to the MEA DH algorithm, what is the next recommended step?", options: ["Begin desensitizing toothpaste immediately", "Administer the DHEQ-15 questionnaire", "Conduct a cold air blast test", "No further evaluation required"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 19, isActive: true, type: 'quiz', question: "Case 3:A 41‑year‑old female patient reports discomfort when brushing and says she has begun avoiding brushing the cervical areas because “the pain is too sharp.” She has no active caries or fractures. She has never used a desensitizing toothpaste. A cold air blast test shows a clear response, but she does not request discontinuation of the stimulus.\nQuestion 3: Based on the MEA screening and diagnostic recommendations, what is the most appropriate next step for this patient?", options: ["Begin laser therapy immediately", "Start her on daily desensitizing toothpaste and provide behavior modification guidance", "Proceed directly to restorative treatment", "No treatment needed since symptoms are mild"], correct: 2,unlockTime: 60, points: 10 },
         { id: 20, isActive: true, type: 'memory', unlockTime: 60, points: 10 }
     ];
 
@@ -505,6 +539,21 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
+
+        // NEW: Footer & Stamp Logic
+        // Remove Footer text and show Stamp for Login, Register, Home
+        const footer = document.querySelector('.app-footer');
+        const stamp = document.getElementById('claim-stamp');
+        
+        const stampScreens = ['login-screen', 'register-screen', 'home-screen'];
+        
+        if (stampScreens.includes(id)) {
+            if(footer) footer.style.display = 'none';
+            if(stamp) stamp.style.display = 'block';
+        } else {
+            if(footer) footer.style.display = 'block';
+            if(stamp) stamp.style.display = 'none';
+        }
     }
 
     // --- DIALOGS (REPLACING ALERTS) ---
@@ -679,7 +728,11 @@ function renderHome() {
                 </video>
             `;
         } else {
+             // UPDATE: Added logo image on top of audio
              contentArea.innerHTML = `
+                <div style="margin-bottom:15px;">
+                    <img src="assets/Sensodyne Ramadan Logo.png" style="width:120px; height:auto; opacity:0.9;">
+                </div>
                 <div style="background:#eee; padding:20px; border-radius:30px; margin-top:10px;">
                     <audio controls autoplay style="width:100%;">
                         <source src="${cfg.media}" type="audio/mpeg">
@@ -712,12 +765,15 @@ function renderHome() {
         const optCon = document.getElementById('q-options'); 
         optCon.innerHTML = '';
         
+        // NEW: Track attempts locally for this question
+        let attempts = 0;
+
         cfg.options.forEach((opt, idx) => {
             const btn = document.createElement('div'); 
             btn.className = 'quiz-opt'; 
             btn.innerText = opt;
             btn.onclick = function() { 
-                // Disable all buttons to prevent multiple clicks
+                // Disable all buttons to prevent multiple clicks immediately
                 document.querySelectorAll('.quiz-opt').forEach(b => b.style.pointerEvents = 'none');
                 
                 document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected')); 
@@ -725,15 +781,30 @@ function renderHome() {
                 
                 setTimeout(() => {
                     const isCorrect = (idx + 1) === cfg.correct;
+                    
                     if(isCorrect) {
                         // Correct: Points + Confetti + Complete
                         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                         completeLevel(10); // Add 10 points
                     } else {
-                        // Wrong: No Points + Alert + Complete (Game Over for this level)
-                        showAlert("Wrong Answer!", "You earned 0 points for this level.", () => {
-                           completeLevel(0); // Add 0 points
-                        });
+                        // Increment attempt counter
+                        attempts++;
+
+                        if (attempts < 2) {
+                            // 1st Wrong Answer: Show alert and allow retry
+                            showAlert("Wrong Answer!", "You answered wrong. You have one more trial.", () => {
+                                // Reset UI: Remove 'selected' style and Re-enable clicks
+                                document.querySelectorAll('.quiz-opt').forEach(b => {
+                                    b.classList.remove('selected');
+                                    b.style.pointerEvents = 'auto';
+                                });
+                            });
+                        } else {
+                            // 2nd Wrong Answer: 0 Points + Complete
+                            showAlert("Wrong Answer!", "You earned 0 points for this level.", () => {
+                               completeLevel(0); // Add 0 points
+                            });
+                        }
                     }
                 }, 500);
             };
@@ -823,10 +894,12 @@ function renderHome() {
     function closeRewards() { document.getElementById('rewards-dialog').style.display = 'none'; }
     function updateRewardsUI() {
         const s = currentUser.totalScore;
-        if(s >= 50) document.getElementById('rwd-1').classList.add('unlocked');
-        if(s >= 100) document.getElementById('rwd-2').classList.add('unlocked');
-        if(s >= 200) document.getElementById('rwd-3').classList.add('unlocked');
+        if(s >= 100) document.getElementById('rwd-1').classList.add('unlocked');
+        if(s >= 200) document.getElementById('rwd-2').classList.add('unlocked');
     }
+
+    // Initialize logic
+    showScreen('login-screen');
 </script>
 </body>
 </html>
