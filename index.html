@@ -89,27 +89,27 @@
         padding-bottom: calc(15px + env(safe-area-inset-bottom)); 
         direction: rtl; 
         box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-        transition: display 0.2s; /* Smooth transition support */
+        transition: display 0.2s; 
     }
 
-    /* --- NEW STAMP STYLE --- */
+    /* --- STAMP STYLE --- */
     .claim-stamp {
         position: absolute;
-        bottom: 90px;
-        left: 140px;
-        width: 150px;
-        height: 150px;
+        bottom: 20px;
+        left: 20px;
+        width: 110px;
+        height: 110px;
         background: var(--claim-stamp) no-repeat center;
         background-size: contain;
         z-index: 50;
-        pointer-events: none; /* Allows clicking items behind it */
-        display: none; /* Hidden by default */
-        opacity: 1;
+        pointer-events: none; 
+        display: none; 
+        opacity: 0.9;
     }
 
     /* --- UI ELEMENTS --- */
     .logo {
-        width: 300px; height: 120px; 
+        width: 200px; height: 100px; 
         background: var(--logo-image) no-repeat center;
         background-size: contain;
         margin: 20px 0; flex-shrink: 0;
@@ -527,8 +527,9 @@
     ];
 
     // --- 2. APP STATE ---
+    // UPDATED: Using 'levels' object (JSON) instead of array
     let currentUser = {
-        name: "", email: "", phone: "", totalScore: 0, completedLevels: [] 
+        name: "", email: "", phone: "", totalScore: 0, levels: {} 
     };
     
     let currentLevelId = 0;
@@ -540,8 +541,7 @@
         document.getElementById(id).classList.add('active');
         if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
 
-        // NEW: Footer & Stamp Logic
-        // Remove Footer text and show Stamp for Login, Register, Home
+        // Footer & Stamp Logic
         const footer = document.querySelector('.app-footer');
         const stamp = document.getElementById('claim-stamp');
         
@@ -608,6 +608,13 @@
         sendRequest({ action: 'login', email: email }, (res) => {
             if(res.status === 'success') {
                 currentUser = res.user;
+                // UPDATED: Ensure levels is an object (parse if string)
+                if (!currentUser.levels) currentUser.levels = {};
+                if (typeof currentUser.levels === 'string') {
+                    try { currentUser.levels = JSON.parse(currentUser.levels); } 
+                    catch(e) { currentUser.levels = {}; }
+                }
+
                 renderHome();
                 showScreen('home-screen');
                 btn.innerText = "Next";
@@ -633,6 +640,9 @@
         sendRequest({ action: 'register', name, email, phone }, (res) => {
             if(res.status === 'success') {
                 currentUser = res.user;
+                // Ensure levels init
+                if (!currentUser.levels) currentUser.levels = {};
+                
                 renderHome();
                 showScreen('home-screen');
             } else {
@@ -642,7 +652,7 @@
         });
     }
 
-function renderHome() {
+    function renderHome() {
         document.getElementById('display-name').innerText = currentUser.name;
         document.getElementById('display-score').innerText = currentUser.totalScore;
         const grid = document.getElementById('level-grid'); 
@@ -650,18 +660,18 @@ function renderHome() {
 
         LEVEL_CONFIG.forEach(lvl => {
             const div = document.createElement('div');
-            const isDone = currentUser.completedLevels.includes(lvl.id);
+            
+            // UPDATED: Check for completion via levels JSON object
+            const isDone = currentUser.levels[lvl.id] && currentUser.levels[lvl.id].status === 'completed';
             
             if (!lvl.isActive) {
                 div.className = 'level-btn locked';
-                // Locked state: Just number (or add icon if you want locked to look same)
                 div.innerHTML = `<span>${lvl.id}</span>`; 
             } else if (isDone) {
                 div.className = 'level-btn completed';
                 div.innerHTML = '<div class="star-img"></div>';
             } else {
                 div.className = 'level-btn';
-                // UPDATE: Structure for overlay
                 div.innerHTML = `
                     <img src="assets/level_icon.png" class="level-icon-img" alt="icon">
                     <span>${lvl.id}</span>
@@ -728,7 +738,7 @@ function renderHome() {
                 </video>
             `;
         } else {
-             // UPDATE: Added logo image on top of audio
+             // Added logo image on top of audio
              contentArea.innerHTML = `
                 <div style="margin-bottom:15px;">
                     <img src="assets/Sensodyne Ramadan Logo.png" style="width:120px; height:auto; opacity:0.9;">
@@ -765,7 +775,7 @@ function renderHome() {
         const optCon = document.getElementById('q-options'); 
         optCon.innerHTML = '';
         
-        // NEW: Track attempts locally for this question
+        // Track attempts locally for this question
         let attempts = 0;
 
         cfg.options.forEach((opt, idx) => {
@@ -873,15 +883,24 @@ function renderHome() {
     }
 
     function completeLevel(pointsToAdd) {
-        if(!currentUser.completedLevels.includes(currentLevelId)) {
-            currentUser.completedLevels.push(currentLevelId);
-            currentUser.totalScore += pointsToAdd; // Cumulative Score Logic
+        // UPDATED: Logic to store data in 'levels' object
+        // Check if level already completed
+        if (!currentUser.levels[currentLevelId] || currentUser.levels[currentLevelId].status !== 'completed') {
             
+            // Store details in local state
+            currentUser.levels[currentLevelId] = {
+                status: 'completed',
+                score: pointsToAdd
+            };
+            
+            currentUser.totalScore += pointsToAdd; 
+            
+            // Send entire levels object to backend
             sendRequest({
                 action: 'saveProgress',
                 email: currentUser.email,
                 totalScore: currentUser.totalScore,
-                completedLevels: currentUser.completedLevels
+                levels: currentUser.levels // Sending JSON object
             }, (res) => { console.log("Progress Saved"); });
         }
         
