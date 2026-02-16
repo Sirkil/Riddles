@@ -109,6 +109,16 @@
         pointer-events: none; /* Allows clicking items behind/over it */
         display: none; 
         opacity: 1;
+        transition: width 0.3s ease, height 0.3s ease, max-width 0.3s ease, max-height 0.3s ease; /* Smooth transition for sizing */
+    }
+
+    /* specific smaller size for home screen */
+    .claim-stamp.small-mode {
+        width: 25vw;
+        height: 25vw;
+        max-width: 100px;
+        max-height: 100px;
+        bottom: 15px;
     }
 
     /* --- UI ELEMENTS --- */
@@ -564,9 +574,18 @@
         if (stampScreens.includes(id)) {
             if(footer) footer.style.display = 'none';
             if(stamp) stamp.style.display = 'block';
+            
+            // NEW: Add special class for home screen mode to make stamp smaller
+            if(id === 'home-screen') {
+                stamp.classList.add('small-mode');
+            } else {
+                stamp.classList.remove('small-mode');
+            }
+
         } else {
             if(footer) footer.style.display = 'block';
             if(stamp) stamp.style.display = 'none';
+            if(stamp) stamp.classList.remove('small-mode');
         }
     }
 
