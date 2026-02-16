@@ -73,6 +73,18 @@
         position: relative;
         z-index: 5; 
     }
+        .register-screen {
+        bottom: 30px;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        flex: 1; 
+        padding: 20px;
+        animation: fadeIn 0.4s ease-in-out;
+        position: relative;
+        z-index: 5; 
+    }
     .screen.active { display: flex; }
 
     /* --- HOME SCREEN SPECIFIC LAYOUT (80/20 SPLIT) --- */
@@ -424,7 +436,7 @@
         <button class="btn" onclick="handleAuth(this)">Next</button>
     </div>
 
-    <div id="register-screen" class="screen" style="justify-content: center;">
+    <div id="register-screen" class="register-screen" style="justify-content: center;">
         <div class="logo"></div>
         <h3 style="margin:0 0 20px 0;">Complete Profile</h3>
         <div class="input-group"><input type="text" id="reg-name" placeholder="Full Name"></div>
@@ -974,5 +986,4 @@ function renderHome() {
     showScreen('login-screen');
 </script>
 </body>
-
 </html>
