@@ -71,9 +71,48 @@
         padding: 20px;
         animation: fadeIn 0.4s ease-in-out;
         position: relative;
-        z-index: 5; /* Ensure content is above background/stamp layer */
+        z-index: 5; 
     }
     .screen.active { display: flex; }
+
+    /* --- HOME SCREEN SPECIFIC LAYOUT (80/20 SPLIT) --- */
+    #home-screen {
+        height: 100%;
+        padding: 0 !important; /* Remove default padding to control layout manually */
+        justify-content: flex-start;
+    }
+
+    .home-content-wrapper {
+        height: 80%;
+        width: 100%;
+        overflow-y: auto;
+        padding: 20px; /* Re-apply padding here */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        scrollbar-width: none;
+    }
+    .home-content-wrapper::-webkit-scrollbar { display: none; }
+
+    .stamp-footer-area {
+        height: 20%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        z-index: 10;
+        padding-bottom: 10px;
+    }
+
+    /* Dedicated stamp for the home screen (Not overlay) */
+    .static-home-stamp {
+        width: 100%;
+        height: 90%;
+        max-height: 140px;
+        background: var(--claim-stamp) no-repeat center;
+        background-size: contain;
+    }
 
     /* --- FOOTER --- */
     .app-footer {
@@ -93,32 +132,23 @@
         transition: display 0.2s; 
     }
 
-    /* --- NEW STAMP STYLE --- */
+    /* --- GLOBAL STAMP (For Login/Register Overlay) --- */
     .claim-stamp {
         position: absolute;
-        bottom: 20px; /* Anchored to bottom */
-        left: 50%; /* Center horizontally */
+        bottom: 20px; 
+        left: 50%; 
         transform: translateX(-50%);
-        width: 35vw; /* Responsive width based on viewport */
-        height: 35vw; /* Maintain aspect ratio */
-        max-width: 160px; /* Max limits */
+        width: 35vw; 
+        height: 35vw; 
+        max-width: 160px; 
         max-height: 160px;
         background: var(--claim-stamp) no-repeat center;
         background-size: contain;
-        z-index: 1; /* Lower Z-index so it stays BEHIND buttons */
-        pointer-events: none; /* Allows clicking items behind/over it */
+        z-index: 1; 
+        pointer-events: none; 
         display: none; 
         opacity: 1;
-        transition: width 0.3s ease, height 0.3s ease, max-width 0.3s ease, max-height 0.3s ease; /* Smooth transition for sizing */
-    }
-
-    /* specific smaller size for home screen */
-    .claim-stamp.small-mode {
-        width: 25vw;
-        height: 25vw;
-        max-width: 100px;
-        max-height: 100px;
-        bottom: 12px;
+        transition: width 0.3s ease, height 0.3s ease; 
     }
 
     /* --- UI ELEMENTS --- */
@@ -131,7 +161,7 @@
 
     .input-group { 
         width: 85%; margin-bottom: 15px; 
-        position: relative; z-index: 10; /* Keep inputs above stamp */
+        position: relative; z-index: 10; 
     }
     
     input {
@@ -161,7 +191,7 @@
         text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         display: flex; justify-content: center; align-items: center; gap: 10px;
         text-decoration: none;
-        position: relative; z-index: 10; /* Keep buttons above stamp */
+        position: relative; z-index: 10; 
     }
     .btn:active { transform: scale(0.98); }
     .btn:disabled, .btn.disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; transform: none; pointer-events: none; }
@@ -227,10 +257,9 @@
     }
     .user-info { flex: 1; text-align: left; }
     
-    /* UPDATED LOGO SIZE */
     .logo-center {
-        width: 140px; /* Increased Size */
-        height: 85px; /* Increased Size */
+        width: 140px; 
+        height: 85px; 
         background: var(--logo-image) no-repeat center;
         background-size: contain; flex: 0 0 140px;
     }
@@ -255,7 +284,7 @@
     /* --- LEVEL GRID --- */
     .level-grid {
         display: grid; grid-template-columns: repeat(4, 1fr);
-        gap: 10px; width: 100%; padding: 0 25px 25px 25px; 
+        gap: 10px; width: 100%; padding: 0 5px 25px 5px; 
         position: relative; z-index: 10;
     }
 
@@ -404,28 +433,34 @@
         <div class="link-text" onclick="showScreen('login-screen')">Back</div>
     </div>
 
-    <div id="home-screen" class="screen" style="padding:0;">
-        <div class="header-banner">
-            <div class="header-pattern"></div>
-            <div class="header-content">
-                <div class="user-info">
-                    <div style="font-size:12px; opacity:0.8; margin-bottom:2px;">Hello!</div>
-                    <div id="display-name" style="font-size:14px; font-weight:bold; line-height:1.1;">Player</div>
-                </div>
-                <div class="logo-center"></div>
-                <div class="score-container">
-                    <div class="score-pill" onclick="openRewards()" style="cursor: pointer;">
-                        <span>⭐</span> <span id="display-score">0</span>
+    <div id="home-screen" class="screen">
+        <div class="home-content-wrapper">
+            <div class="header-banner">
+                <div class="header-pattern"></div>
+                <div class="header-content">
+                    <div class="user-info">
+                        <div style="font-size:12px; opacity:0.8; margin-bottom:2px;">Hello!</div>
+                        <div id="display-name" style="font-size:14px; font-weight:bold; line-height:1.1;">Player</div>
+                    </div>
+                    <div class="logo-center"></div>
+                    <div class="score-container">
+                        <div class="score-pill" onclick="openRewards()" style="cursor: pointer;">
+                            <span>⭐</span> <span id="display-score">0</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="level-grid" id="level-grid"></div>
+            
+            <div class="level-grid" id="level-grid"></div>
 
-        <div class="home-actions">
-            <button class="btn" style="flex: 2; margin-top:0;" onclick="openRewards()">Giveaways</button>
-            <button class="btn btn-secondary btn-icon-only" style="margin-top:0;" onclick="handleLogout()"><i class="fa fa-sign-out-alt"></i></button>
+            <div class="home-actions">
+                <button class="btn" style="flex: 2; margin-top:0;" onclick="openRewards()">Giveaways</button>
+                <button class="btn btn-secondary btn-icon-only" style="margin-top:0;" onclick="handleLogout()"><i class="fa fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+
+        <div class="stamp-footer-area">
+            <div class="static-home-stamp"></div>
         </div>
     </div>
 
@@ -565,27 +600,30 @@
         if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
 
         // NEW: Footer & Stamp Logic
-        // Remove Footer text and show Stamp for Login, Register, Home
         const footer = document.querySelector('.app-footer');
-        const stamp = document.getElementById('claim-stamp');
+        const globalStamp = document.getElementById('claim-stamp');
         
-        const stampScreens = ['login-screen', 'register-screen', 'home-screen'];
+        // Screens that use the GLOBAL overlay stamp
+        const overlayStampScreens = ['login-screen', 'register-screen'];
         
-        if (stampScreens.includes(id)) {
+        if (overlayStampScreens.includes(id)) {
+            // Login/Register: Show Global Stamp (Overlay), Hide Footer
             if(footer) footer.style.display = 'none';
-            if(stamp) stamp.style.display = 'block';
-            
-            // NEW: Add special class for home screen mode to make stamp smaller
-            if(id === 'home-screen') {
-                stamp.classList.add('small-mode');
-            } else {
-                stamp.classList.remove('small-mode');
+            if(globalStamp) {
+                globalStamp.style.display = 'block';
+                globalStamp.classList.remove('small-mode');
             }
-
-        } else {
+        } 
+        else if (id === 'home-screen') {
+            // Home Screen: Has its own internal stamp structure (80/20 split).
+            // Hide global stamp, hide footer.
+            if(footer) footer.style.display = 'none';
+            if(globalStamp) globalStamp.style.display = 'none';
+        } 
+        else {
+            // Content Screens: Show Footer, Hide Stamp
             if(footer) footer.style.display = 'block';
-            if(stamp) stamp.style.display = 'none';
-            if(stamp) stamp.classList.remove('small-mode');
+            if(globalStamp) globalStamp.style.display = 'none';
         }
     }
 
@@ -936,4 +974,3 @@ function renderHome() {
 </script>
 </body>
 </html>
-
