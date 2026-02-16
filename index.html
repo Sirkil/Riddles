@@ -121,9 +121,9 @@
         padding: 15px 25px;
         text-align: center;
         background: linear-gradient(to bottom, var(--dark-blue), #00224400);
-        color: rgba(255, 255, 255, 0.95);
-        font-size: 14px;
-        font-weight: normal;
+        color: rgba(255, 255, 255, 1);
+        font-size: 18px;
+        font-weight: bold;
         letter-spacing: 0.5px;
         flex-shrink: 0; 
         border-top: 2px solid rgba(255, 255, 255, 0.25);
@@ -358,12 +358,23 @@
     .quiz-question-box {
         background: linear-gradient(135deg, #002244, #0056b3); padding: 20px; border-radius: 16px; 
         margin-bottom: 20px; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        min-height: 80px; display: flex; align-items: center; justify-content: center;
+        min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .quiz-question-box h3 {
         margin: 0; text-align: center; font-weight: 600; line-height: 1.3;
         font-size: clamp(14px, 4vw, 18px); 
         word-wrap: break-word;
+    }
+    .detailer-trigger {
+        width: 100%;
+        text-align: right;
+        margin-top: 10px;
+    }
+    .detailer-trigger span {
+        font-size: 12px;
+        color: #00d2ff;
+        text-decoration: underline;
+        cursor: pointer;
     }
 
     /* --- PDF SPECIFIC --- */
@@ -492,6 +503,9 @@
         <div class="logo" style="transform:scale(0.7); margin-bottom:15px; margin-top:20px;"></div>
         <div class="quiz-question-box">
             <h3 id="q-text">Question?</h3>
+            <div class="detailer-trigger" id="detailer-trigger-container">
+                 <span onclick="triggerDetailer()">View detailer snapshots</span>
+            </div>
         </div>
         <div id="q-options" style="width:100%;"></div>
     </div>
@@ -531,12 +545,16 @@
         <h2 style="margin-top:0; color:white;">Your Giveaways</h2>
         <div class="reward-item" id="rwd-1">
             <div class="reward-icon">🔒</div>
-            <div><b>Giveaway 1</b><br><span style="font-size:12px;">Earn 100 points</span></div>
+            <div><b>Giveaway</b><br><span style="font-size:12px;">Earn 200 points</span></div>
         </div>
-        <div class="reward-item" id="rwd-2">
-            <div class="reward-icon">🔒</div>
-            <div><b>Giveaway 2</b><br><span style="font-size:12px;">Earn 200 points</span></div>
-        </div>
+    </div>
+</div>
+
+<div id="detailer-popup" class="dialog-overlay" onclick="closeDetailer()">
+    <div class="dialog-box" onclick="event.stopPropagation()" style="width:95%; max-width:500px; padding:15px;">
+        <span class="close-dialog" onclick="closeDetailer()" style="top:5px; right:10px;">&times;</span>
+        <h3 style="margin-top:10px; color:white;">Detailer Snapshot</h3>
+        <img id="detailer-img" src="" style="width:100%; height:auto; border-radius:10px; margin-top:5px;" alt="Detailer Info">
     </div>
 </div>
 
@@ -563,24 +581,24 @@
     // --- 1. CONFIGURATION ---
     const API_URL = "https://script.google.com/macros/s/AKfycbxyAbNkAl7toIm4sGLSP9JBWtbyha4hiPy32crPLBeL3cTrlw5vmUWaSsWDOSxekqeQ/exec"; 
 
-    // Updated: All points are 10.
+    // Updated: Added 'detailer' image paths for levels 9-16
     const LEVEL_CONFIG = [
         { id: 1, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/1.mp4', unlockTime: 60, points: 10 },
         { id: 2, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/2.mp4', unlockTime: 60, points: 10 },
-        { id: 3, isActive: true, type: 'pdf', media: 'https://www.weebly.com/uploads/2/3/2/2/23222332/custom_themes/464933049751344157/files/sensodyne/Algorithm_V5RGY.pdf', unlockTime: 60, question: "Sensodyne Rapid action provides Dentine Hypersensitivity relief in", options: ["60 Seconds", "2 minutes", "1 hour", "2 days"], correct: 1, points: 10 },
-        { id: 4, isActive: true, type: 'pdf', media: 'https://riddles-1zcx.onrender.com/Sensodyne%20LB1%20_Rapid_EG_whatsapp%20FINAL.pdf', unlockTime: 60, question: "Percentages of Egyptians suffering from Dentine Hypersensitivity", options: ["30%", "50%", "64%", "10%"], correct: 3, points: 10 },
-        { id: 5, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%201%20-%20Dr%20Manal%20Awad%20-%20Dentine%20Hypersensitivity%20Demystified.mp3', unlockTime: 60, points: 10 },
-        { id: 6, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%204%20-%20Dr%20Samira%20Osailan%2C%20Dr%20Aslan%20Gokbuget%20-%20Team%20Effort%20The%20Multidisciplinary%20Approach%20to%20DH.mp3', unlockTime: 60, points: 10 },
-        { id: 7, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%207%20-%20Dr%20Nour%20Habib%20-%20Winning%20A-Z%20Strategies%20for%20Managing%20DH.mp3', unlockTime: 60, points: 10 },
-        { id: 8, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding Dentine Discussions podcast series - Episode 8 - Dr Hesham Marei - The DH Challenge Myths and Realities.mp3', unlockTime: 60, points: 10 },
-        { id: 9, isActive: true, type: 'quiz', question: "According to MEA experts (2024), DH screening should be performed for:", options: ["Only high-risk patients", "Patients with visible enamel loss", "All patients visiting dental clinics", "Patients complaining of toothache"], correct: 3, unlockTime: 60,points: 10 },
-        { id: 10, isActive: true, type: 'quiz', question: "What percentage of DH patients typically do NOT mention their condition to dentists?", options: ["10%", "25%", "50%", "75%"], correct: 3, unlockTime: 60,points: 10 },
-        { id: 11, isActive: true, type: 'quiz', question: "The Schiff scale score '3' indicates:", options: ["Mild discomfort without request to stop", "No response to stimulus", "Patient requests discontinuation and considers stimulus painful", "Normal sensitivity"], correct: 3,unlockTime: 60, points: 10 },
-        { id: 12, isActive: true, type: 'quiz', question: "The first step in the MEA management algorithm for DH is:", options: ["Laser therapy", "Patient education & behavior modification", "Fluoride varnish", "Gingival grafting"], correct: 2,unlockTime: 60, points: 10 },
-        { id: 13, isActive: true, type: 'quiz', question: "According to the content, DH negatively impacts patients' quality of life by:", options: ["Improving oral hygiene habits", "Affecting emotional, social, and functional aspects", "Increasing appetite", "Reducing dental visits"], correct: 2,unlockTime: 60, points: 10 },
-        { id: 14, isActive: true, type: 'quiz', question: "A key barrier preventing proper DH diagnosis is:", options: ["Excessive diagnostic time", "Overestimation of DH importance", "Lack of proactive screening", "High cost of diagnostic tools"], correct: 3,unlockTime: 60, points: 10 },
-        { id: 15, isActive: true, type: 'quiz', question: "For asymptomatic patients who answer 'NO' to sensitivity, the next step is:", options: ["Start immediate in-office treatment", "Use the DHEQ-15 questionnaire", "Perform cold air blast test", "No further evaluation"], correct: 3,unlockTime: 60, points: 10 },
-        { id: 16, isActive: true, type: 'quiz', question: "DH tends to reoccur if:", options: ["The patient uses only water flossers", "Desensitizing agents are discontinued", "Fluoride toothpaste is used daily", "Patients consume hot beverages"], correct: 2, unlockTime: 60,points: 10 },
+        { id: 3, isActive: true, type: 'pdf', detailer: 'assets/detailer_7.png',media: 'https://www.weebly.com/uploads/2/3/2/2/23222332/custom_themes/464933049751344157/files/sensodyne/Algorithm_V5RGY.pdf', unlockTime: 60, question: "Sensodyne Rapid action provides Dentine Hypersensitivity relief in", options: ["60 Seconds", "2 minutes", "1 hour", "2 days"], correct: 1, points: 10 },
+        { id: 4, isActive: true, type: 'pdf', detailer: 'assets/detailer_8.png',media: 'https://riddles-1zcx.onrender.com/Sensodyne%20LB1%20_Rapid_EG_whatsapp%20FINAL.pdf', unlockTime: 60, question: "Percentages of Egyptians suffering from Dentine Hypersensitivity", options: ["30%", "50%", "64%", "10%"], correct: 3, points: 10 },
+        { id: 5, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%201%20-%20Dr%20Manal%20Awad%20-%20Dentine%20Hypersensitivity%20Demystified.mp3', unlockTime: 420, points: 10 },
+        { id: 6, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%204%20-%20Dr%20Samira%20Osailan%2C%20Dr%20Aslan%20Gokbuget%20-%20Team%20Effort%20The%20Multidisciplinary%20Approach%20to%20DH.mp3', unlockTime: 420, points: 10 },
+        { id: 7, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%207%20-%20Dr%20Nour%20Habib%20-%20Winning%20A-Z%20Strategies%20for%20Managing%20DH.mp3', unlockTime: 420, points: 10 },
+        { id: 8, isActive: true, type: 'audio', media: 'https://riddles-1zcx.onrender.com/aac_Decoding%20Dentine%20Discussions%20podcast%20series%20-%20Episode%208%20-%20Dr%20Hesham%20Marei%20-%20The%20DH%20Challenge%20Myths%20and%20Realities.mp3', unlockTime: 420, points: 10 },
+        { id: 9, isActive: true, type: 'quiz', detailer: 'assets/detailer_9.png', question: "According to MEA experts (2024), DH screening should be performed for:", options: ["Only high-risk patients", "Patients with visible enamel loss", "All patients visiting dental clinics", "Patients complaining of toothache"], correct: 3, unlockTime: 60,points: 10 },
+        { id: 10, isActive: true, type: 'quiz', detailer: 'assets/detailer_10.png', question: "What percentage of DH patients typically do NOT mention their condition to dentists?", options: ["10%", "25%", "50%", "75%"], correct: 3, unlockTime: 60,points: 10 },
+        { id: 11, isActive: true, type: 'quiz', detailer: 'assets/detailer_11.png', question: "The Schiff scale score '3' indicates:", options: ["Mild discomfort without request to stop", "No response to stimulus", "Patient requests discontinuation and considers stimulus painful", "Normal sensitivity"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 12, isActive: true, type: 'quiz', detailer: 'assets/detailer_12.png', question: "The first step in the MEA management algorithm for DH is:", options: ["Laser therapy", "Patient education & behavior modification", "Fluoride varnish", "Gingival grafting"], correct: 2,unlockTime: 60, points: 10 },
+        { id: 13, isActive: true, type: 'quiz', detailer: 'assets/detailer_13.png', question: "According to the content, DH negatively impacts patients' quality of life by:", options: ["Improving oral hygiene habits", "Affecting emotional, social, and functional aspects", "Increasing appetite", "Reducing dental visits"], correct: 2,unlockTime: 60, points: 10 },
+        { id: 14, isActive: true, type: 'quiz', detailer: 'assets/detailer_14.png', question: "A key barrier preventing proper DH diagnosis is:", options: ["Excessive diagnostic time", "Overestimation of DH importance", "Lack of proactive screening", "High cost of diagnostic tools"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 15, isActive: true, type: 'quiz', detailer: 'assets/detailer_15.png', question: "For asymptomatic patients who answer 'NO' to sensitivity, the next step is:", options: ["Start immediate in-office treatment", "Use the DHEQ-15 questionnaire", "Perform cold air blast test", "No further evaluation"], correct: 3,unlockTime: 60, points: 10 },
+        { id: 16, isActive: true, type: 'quiz', detailer: 'assets/detailer_16.png', question: "DH tends to reoccur if:", options: ["The patient uses only water flossers", "Desensitizing agents are discontinued", "Fluoride toothpaste is used daily", "Patients consume hot beverages"], correct: 2, unlockTime: 60,points: 10 },
         { id: 17, isActive: true, type: 'quiz', question: "Case 1:A 32-year-old patient reports sharp, short pain when drinking cold water. She assumed it was normal and never mentioned it. Clinical exam shows no caries or fractures. Cold air blast test triggers immediate pain and she requests discontinuation.\nQuestion 1: Based on the Schiff scale, what score best represents her response?", options: ["No response", "Responds but does not request discontinuation", "Moves away or requests discontinuation", "Severe pain and immediate discontinuation"], correct: 4,unlockTime: 60, points: 10 },
         { id: 18, isActive: true, type: 'quiz', question: "Case 2:A 45-year-old male presents for routine cleaning. When asked, 'Do you have sensitive teeth?' he answers 'No.' Mild cervical abrasion is present. No prior use of desensitizing toothpaste.\nQuestion 2: According to the MEA DH algorithm, what is the next recommended step?", options: ["Begin desensitizing toothpaste immediately", "Administer the DHEQ-15 questionnaire", "Conduct a cold air blast test", "No further evaluation required"], correct: 3,unlockTime: 60, points: 10 },
         { id: 19, isActive: true, type: 'quiz', question: "Case 3:A 41‑year‑old female patient reports discomfort when brushing and says she has begun avoiding brushing the cervical areas because “the pain is too sharp.” She has no active caries or fractures. She has never used a desensitizing toothpaste. A cold air blast test shows a clear response, but she does not request discontinuation of the stimulus.\nQuestion 3: Based on the MEA screening and diagnostic recommendations, what is the most appropriate next step for this patient?", options: ["Begin laser therapy immediately", "Start her on daily desensitizing toothpaste and provide behavior modification guidance", "Proceed directly to restorative treatment", "No treatment needed since symptoms are mild"], correct: 2,unlockTime: 60, points: 10 },
@@ -601,15 +619,12 @@
         document.getElementById(id).classList.add('active');
         if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
 
-        // NEW: Footer & Stamp Logic
+        // Footer & Stamp Logic
         const footer = document.querySelector('.app-footer');
         const globalStamp = document.getElementById('claim-stamp');
-        
-        // Screens that use the GLOBAL overlay stamp
         const overlayStampScreens = ['login-screen', 'register-screen'];
         
         if (overlayStampScreens.includes(id)) {
-            // Login/Register: Show Global Stamp (Overlay), Hide Footer
             if(footer) footer.style.display = 'none';
             if(globalStamp) {
                 globalStamp.style.display = 'block';
@@ -617,26 +632,22 @@
             }
         } 
         else if (id === 'home-screen') {
-            // Home Screen: Has its own internal stamp structure (80/20 split).
-            // Hide global stamp, hide footer.
             if(footer) footer.style.display = 'none';
             if(globalStamp) globalStamp.style.display = 'none';
         } 
         else {
-            // Content Screens: Show Footer, Hide Stamp
             if(footer) footer.style.display = 'block';
             if(globalStamp) globalStamp.style.display = 'none';
         }
     }
 
-    // --- DIALOGS (REPLACING ALERTS) ---
+    // --- DIALOGS ---
     function showAlert(title, msg, callback) {
         document.getElementById('alert-title').innerText = title;
         document.getElementById('alert-msg').innerText = msg;
         const alertBox = document.getElementById('custom-alert');
         alertBox.style.display = 'flex';
         
-        // Ensure old event listeners don't stack
         const btn = alertBox.querySelector('.btn');
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
@@ -655,6 +666,21 @@
     function closeExitAlert() { document.getElementById('exit-dialog').style.display = 'none'; }
     function confirmExit() { closeExitAlert(); showScreen('home-screen'); }
     function handleLogout() { if(confirm("Log out?")) location.reload(); }
+
+    // --- DETAILER POPUP LOGIC ---
+    function openDetailer(imgSrc) {
+        document.getElementById('detailer-img').src = imgSrc;
+        document.getElementById('detailer-popup').style.display = 'flex';
+    }
+    function closeDetailer() {
+        document.getElementById('detailer-popup').style.display = 'none';
+    }
+    
+    // Global variable to hold current detailer image logic if needed
+    let currentDetailerImg = "";
+    function triggerDetailer() {
+        if(currentDetailerImg) openDetailer(currentDetailerImg);
+    }
 
     // --- 4. BACKEND INTEGRATION ---
     function sendRequest(data, callback) {
@@ -727,14 +753,12 @@ function renderHome() {
             
             if (!lvl.isActive) {
                 div.className = 'level-btn locked';
-                // Locked state: Just number (or add icon if you want locked to look same)
                 div.innerHTML = `<span>${lvl.id}</span>`; 
             } else if (isDone) {
                 div.className = 'level-btn completed';
                 div.innerHTML = '<div class="star-img"></div>';
             } else {
                 div.className = 'level-btn';
-                // UPDATE: Structure for overlay
                 div.innerHTML = `
                     <img src="assets/level_icon.png" class="level-icon-img" alt="icon">
                     <span>${lvl.id}</span>
@@ -762,6 +786,8 @@ function renderHome() {
     }
 
     function setupMediaScreen(cfg) {
+        showScreen('media-screen'); // Call first
+
         const iconCon = document.getElementById('media-icon-container');
         const contentArea = document.getElementById('media-content-area');
         const btn = document.getElementById('media-next-btn');
@@ -771,7 +797,6 @@ function renderHome() {
         btn.disabled = true; btn.classList.add('disabled');
         
         if(cfg.type === 'pdf') {
-            timerDisplay.innerText = "--";
             contentArea.innerHTML = `
                 <p>Read the document to complete the level.</p>
                 <div class="pdf-link-btn" id="pdf-trigger">
@@ -786,38 +811,36 @@ function renderHome() {
                 btn.classList.remove('disabled');
             };
             btn.onclick = () => setupQuizScreen(cfg); 
-            showScreen('media-screen');
-            return;
+        } 
+        else {
+            let iconClass = cfg.type === 'video' ? 'fa-video' : 'fa-headphones';
+            iconCon.innerHTML = `<i class="fas ${iconClass}" style="font-size:50px; color:#0070c0;"></i>`;
+            
+            if(cfg.type === 'video') {
+                contentArea.innerHTML = `
+                    <video width="100%" height="200" controls autoplay style="border-radius:10px; background:black; max-width:100%;">
+                        <source src="${cfg.media}" type="video/mp4">
+                        Your browser does not support video.
+                    </video>
+                `;
+            } else {
+                 contentArea.innerHTML = `
+                    <div style="margin-bottom:15px;">
+                        <img src="assets/Sensodyne Ramadan Logo.png" style="width:120px; height:auto; opacity:0.9;">
+                    </div>
+                    <div style="background:#eee; padding:20px; border-radius:30px; margin-top:10px;">
+                        <audio controls autoplay style="width:100%;">
+                            <source src="${cfg.media}" type="audio/mpeg">
+                            Your browser does not support audio.
+                        </audio>
+                    </div>`;
+            }
+
+            btn.innerText = "Finish Level";
+            btn.onclick = () => completeLevel(cfg.points);
         }
 
-        let iconClass = cfg.type === 'video' ? 'fa-video' : 'fa-headphones';
-        iconCon.innerHTML = `<i class="fas ${iconClass}" style="font-size:50px; color:#0070c0;"></i>`;
-        
-        if(cfg.type === 'video') {
-            contentArea.innerHTML = `
-                <video width="100%" height="200" controls autoplay style="border-radius:10px; background:black; max-width:100%;">
-                    <source src="${cfg.media}" type="video/mp4">
-                    Your browser does not support video.
-                </video>
-            `;
-        } else {
-             // UPDATE: Added logo image on top of audio
-             contentArea.innerHTML = `
-                <div style="margin-bottom:15px;">
-                    <img src="assets/Sensodyne Ramadan Logo.png" style="width:120px; height:auto; opacity:0.9;">
-                </div>
-                <div style="background:#eee; padding:20px; border-radius:30px; margin-top:10px;">
-                    <audio controls autoplay style="width:100%;">
-                        <source src="${cfg.media}" type="audio/mpeg">
-                        Your browser does not support audio.
-                    </audio>
-                </div>`;
-        }
-
-        btn.innerText = "Finish Level";
-        btn.onclick = () => completeLevel(cfg.points);
-        showScreen('media-screen');
-
+        // TIMER LOGIC
         let timeLeft = cfg.unlockTime || 10;
         timerDisplay.innerText = timeLeft;
         if(timerInterval) clearInterval(timerInterval);
@@ -826,19 +849,32 @@ function renderHome() {
             timeLeft--;
             timerDisplay.innerText = timeLeft;
             if(timeLeft <= 0) {
+                if(cfg.type !== 'pdf') { 
+                    btn.disabled = false;
+                    btn.classList.remove('disabled');
+                }
                 clearInterval(timerInterval);
-                btn.disabled = false;
-                btn.classList.remove('disabled');
             }
         }, 1000);
     }
 
     function setupQuizScreen(cfg) {
+        showScreen('quiz-screen'); // FIX: Call BEFORE timer starts
+
         document.getElementById('q-text').innerText = cfg.question;
         const optCon = document.getElementById('q-options'); 
         optCon.innerHTML = '';
         
-        // NEW: Track attempts locally for this question
+        // Detailer Button Logic
+        const detailerContainer = document.getElementById('detailer-trigger-container');
+        if(cfg.detailer) {
+            currentDetailerImg = cfg.detailer;
+            detailerContainer.style.display = 'block';
+        } else {
+            currentDetailerImg = "";
+            detailerContainer.style.display = 'none';
+        }
+
         let attempts = 0;
 
         cfg.options.forEach((opt, idx) => {
@@ -846,7 +882,6 @@ function renderHome() {
             btn.className = 'quiz-opt'; 
             btn.innerText = opt;
             btn.onclick = function() { 
-                // Disable all buttons to prevent multiple clicks immediately
                 document.querySelectorAll('.quiz-opt').forEach(b => b.style.pointerEvents = 'none');
                 
                 document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected')); 
@@ -856,26 +891,20 @@ function renderHome() {
                     const isCorrect = (idx + 1) === cfg.correct;
                     
                     if(isCorrect) {
-                        // Correct: Points + Confetti + Complete
                         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                        completeLevel(10); // Add 10 points
+                        completeLevel(10); 
                     } else {
-                        // Increment attempt counter
                         attempts++;
-
                         if (attempts < 2) {
-                            // 1st Wrong Answer: Show alert and allow retry
                             showAlert("Wrong Answer!", "You answered wrong. You have one more trial.", () => {
-                                // Reset UI: Remove 'selected' style and Re-enable clicks
                                 document.querySelectorAll('.quiz-opt').forEach(b => {
                                     b.classList.remove('selected');
                                     b.style.pointerEvents = 'auto';
                                 });
                             });
                         } else {
-                            // 2nd Wrong Answer: 0 Points + Complete
                             showAlert("Wrong Answer!", "You earned 0 points for this level.", () => {
-                               completeLevel(0); // Add 0 points
+                               completeLevel(0); 
                             });
                         }
                     }
@@ -884,22 +913,26 @@ function renderHome() {
             optCon.appendChild(btn);
         });
 
-        // Timer Display Only
+        // Timer Display
         const timerDisplay = document.getElementById('quiz-timer');
         let timeLeft = cfg.unlockTime || 60;
         timerDisplay.innerText = timeLeft;
+        
         if(timerInterval) clearInterval(timerInterval);
         
         timerInterval = setInterval(() => {
-            if(timeLeft > 0) timeLeft--;
-            timerDisplay.innerText = timeLeft;
-            if(timeLeft <= 0) clearInterval(timerInterval);
+            if(timeLeft > 0) {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+            } else {
+                clearInterval(timerInterval);
+            }
         }, 1000);
-
-        showScreen('quiz-screen');
     }
 
     function setupMemoryGame(cfg) { 
+        showScreen('minigame-screen'); // FIX: Call BEFORE timer starts
+
         const board = document.getElementById('memory-board');
         board.innerHTML = '';
         let matches = 0; let flipped = [];
@@ -920,7 +953,7 @@ function renderHome() {
                         if(flipped[0].val === flipped[1].val) {
                             matches++; flipped = [];
                             if(matches === 4) {
-                                setTimeout(() => { confetti(); completeLevel(10); }, 500); // Updated to 10 points
+                                setTimeout(() => { confetti(); completeLevel(10); }, 500); 
                             }
                         } else {
                             setTimeout(() => { flipped.forEach(f => { f.card.classList.remove('flipped'); }); flipped = []; }, 800);
@@ -934,21 +967,23 @@ function renderHome() {
         const timerDisplay = document.getElementById('memory-timer');
         let timeLeft = (cfg && cfg.unlockTime) ? cfg.unlockTime : 60;
         timerDisplay.innerText = timeLeft;
+        
         if(timerInterval) clearInterval(timerInterval);
         
         timerInterval = setInterval(() => {
-            if(timeLeft > 0) timeLeft--;
-            timerDisplay.innerText = timeLeft;
-            if(timeLeft <= 0) clearInterval(timerInterval);
+            if(timeLeft > 0) {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+            } else {
+                clearInterval(timerInterval);
+            }
         }, 1000);
-
-        showScreen('minigame-screen');
     }
 
     function completeLevel(pointsToAdd) {
         if(!currentUser.completedLevels.includes(currentLevelId)) {
             currentUser.completedLevels.push(currentLevelId);
-            currentUser.totalScore += pointsToAdd; // Cumulative Score Logic
+            currentUser.totalScore += pointsToAdd; 
             
             sendRequest({
                 action: 'saveProgress',
@@ -967,8 +1002,14 @@ function renderHome() {
     function closeRewards() { document.getElementById('rewards-dialog').style.display = 'none'; }
     function updateRewardsUI() {
         const s = currentUser.totalScore;
-        if(s >= 100) document.getElementById('rwd-1').classList.add('unlocked');
-        if(s >= 200) document.getElementById('rwd-2').classList.add('unlocked');
+        if(s >= 200) {
+            const item = document.getElementById('rwd-1');
+            item.classList.add('unlocked');
+            item.innerHTML = `
+                <div class="reward-icon">🎉</div>
+                <div><b>Congratulations!</b><br><span style="font-size:12px;">Your score is 200 stay tuned for your recognition</span></div>
+            `;
+        }
     }
 
     // Initialize logic
