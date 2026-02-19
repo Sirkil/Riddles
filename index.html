@@ -508,9 +508,14 @@
 
         <div class="logo" style="transform:scale(0.6); margin-bottom:30px; margin-top:0;"></div>
         
-        <img id="quiz-detailer-thumb" src="" 
-             style="display:none; max-width: 250px; max-height: 250px; margin: 0 auto 15px auto; cursor: pointer; border-radius: 8px; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.2);" 
-             onclick="triggerDetailer()" alt="Detailer Snapshot">
+        <div id="quiz-detailer-container" style="display:none; position: relative; width: fit-content; margin: 0 auto 15px auto; cursor: pointer;" onclick="triggerDetailer()">
+    <img id="quiz-detailer-thumb" src="" 
+         style="max-width: 250px; max-height: 250px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: block;" 
+         alt="Detailer Snapshot">
+    <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.65); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+        <i class="fa fa-expand"></i>
+    </div>
+</div>
 
         <div class="quiz-question-box">
             <h3 id="q-text">Question?</h3>
@@ -925,16 +930,16 @@ function renderHome() {
         const optCon = document.getElementById('q-options'); 
         optCon.innerHTML = '';
         
-        // Detailer Button Logic
 // Detailer Thumbnail Logic
         const thumb = document.getElementById('quiz-detailer-thumb');
+        const thumbContainer = document.getElementById('quiz-detailer-container');
         if(cfg.detailer) {
             currentDetailerImg = cfg.detailer;
             thumb.src = cfg.detailer;
-            thumb.style.display = 'block';
+            thumbContainer.style.display = 'block';
         } else {
             currentDetailerImg = "";
-            thumb.style.display = 'none';
+            thumbContainer.style.display = 'none';
         }
 
         let attempts = 0;
