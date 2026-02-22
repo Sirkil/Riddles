@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Sensodyne Ramadan Riddles</title>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
  <style>
     /* --- FONT FACE --- */
@@ -607,8 +611,24 @@
     // --- 1. CONFIGURATION ---
     const API_URL = "https://script.google.com/macros/s/AKfycbxyAbNkAl7toIm4sGLSP9JBWtbyha4hiPy32crPLBeL3cTrlw5vmUWaSsWDOSxekqeQ/exec"; 
 
+    // --- FIREBASE SETUP ---
+const firebaseConfig = {
+  apiKey: "AIzaSyCD_CyrG2jRp1-pFEnQAJlglABoenk2yy4",
+  authDomain: "sensodyne-riddles.firebaseapp.com",
+  projectId: "sensodyne-riddles",
+  storageBucket: "sensodyne-riddles.firebasestorage.app",
+  messagingSenderId: "78042126116",
+  appId: "1:78042126116:web:3903218c3af5a0e71905b1"
+};
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
     // Updated: Added 'detailer' image paths for levels 9-16
- const LEVEL_CONFIG = [
+    const LEVEL_CONFIG = [
         { id: 1, isActive: true, type: 'quiz', detailer: 'assets/detailer_5.png', question: "Which diagnostic tool is recommended by MEA experts for DH assessment?", options: ["Thermal imaging camera", "Cold air blast test using 3-way syringe", "Electric pulp testing only", "Bitewing radiographs"], correct: 2, unlockTime: 60, points: 10 },
         { id: 2, isActive: true, type: 'memory', unlockTime: 60, points: 10 },
         { id: 3, isActive: true, type: 'quiz', detailer: 'assets/detailer_13.png', question: "According to the content, DH negatively impacts patients' quality of life by:", options: ["Improving oral hygiene habits", "Affecting emotional, social, and functional aspects", "Increasing appetite", "Reducing dental visits"], correct: 2, unlockTime: 60, points: 10 },
@@ -649,6 +669,7 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
+        
         // Footer & Stamp Logic
         const footer = document.querySelector('.app-footer');
         const globalStamp = document.getElementById('claim-stamp');
@@ -705,85 +726,113 @@
     function closeDetailer() {
         document.getElementById('detailer-popup').style.display = 'none';
     }
-    // --- PDF POPUP LOGIC ---
-function openPdfPopup(pdfUrl) {
-    // We use Google Docs Viewer to ensure it renders inside the iframe on all devices
-    const viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + encodeURIComponent(pdfUrl);
-    document.getElementById('pdf-frame').src = viewerUrl;
-    document.getElementById('pdf-popup').style.display = 'flex';
-}
 
-function closePdfPopup() {
-    document.getElementById('pdf-popup').style.display = 'none';
-    document.getElementById('pdf-frame').src = ""; // clear source to stop memory usage
-}
+    // --- PDF POPUP & DOWNLOAD LOGIC ---
+    function openPdfPopup(pdfUrl) {
+        // 1. Trigger the file download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pdfUrl;
+        const fileName = pdfUrl.substring(pdfUrl.lastIndexOf('/') + 1) || 'Sensodyne_Document.pdf';
+        downloadLink.download = fileName;
+        downloadLink.target = '_blank'; 
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+        // 2. Open the preview in the iframe
+        const viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + encodeURIComponent(pdfUrl);
+        document.getElementById('pdf-frame').src = viewerUrl;
+        document.getElementById('pdf-popup').style.display = 'flex';
+    }
+
+    function closePdfPopup() {
+        document.getElementById('pdf-popup').style.display = 'none';
+        document.getElementById('pdf-frame').src = ""; // clear source to stop memory usage
+    }
     
-    // Global variable to hold current detailer image logic if needed
     let currentDetailerImg = "";
     function triggerDetailer() {
         if(currentDetailerImg) openDetailer(currentDetailerImg);
     }
 
-    // --- 4. BACKEND INTEGRATION ---
-    function sendRequest(data, callback) {
-        fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => callback(result))
-        .catch(error => {
-            showAlert("Error", "Connection lost. Please check internet.");
-            const btns = document.querySelectorAll('.btn');
-            btns.forEach(b => { if(b.innerText === "Loading...") b.innerText = "Try Again"; });
-        });
-    }
-
-    // --- 5. AUTH LOGIC ---
-    function handleAuth(btn) {
-        const email = document.getElementById('login-email').value.trim();
+    // --- 4. AUTH & DATA LOGIC (Updated to Firebase + Google Sheets) ---
+    
+    async function handleAuth(btn) {
+        // Enforce lowercase to prevent duplicate users (e.g. Test@email.com vs test@email.com)
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
         if(!email) return showAlert("Error", "Please enter your email.");
 
         btn.innerText = "Loading...";
         
-        sendRequest({ action: 'login', email: email }, (res) => {
-            if(res.status === 'success') {
-                currentUser = res.user;
+        try {
+            // FAST: Check Firebase instantly
+            const userDoc = await db.collection('users').doc(email).get();
+            
+            if (userDoc.exists) {
+                currentUser = userDoc.data();
                 renderHome();
                 showScreen('home-screen');
                 btn.innerText = "Next";
-            } else if (res.status === 'not_found') {
+
+                // BACKGROUND SYNC: Update Google Sheets silently
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'login', email: email })
+                }).catch(e => console.error("Sheet sync error", e));
+
+            } else {
                 document.getElementById('reg-email-hidden').value = email; 
                 showScreen('register-screen');
                 btn.innerText = "Next";
-            } else {
-                showAlert("Error", res.message || "Something went wrong");
-                btn.innerText = "Next";
             }
-        });
+        } catch (error) {
+            console.error("Firebase Auth Error: ", error);
+            showAlert("Error", "Connection error. Please try again.");
+            btn.innerText = "Next";
+        }
     }
 
-    function handleRegister(btn) {
-        const name = document.getElementById('reg-name').value;
-        const phone = document.getElementById('reg-phone').value;
-        const email = document.getElementById('reg-email-hidden').value; 
+    async function handleRegister(btn) {
+        const name = document.getElementById('reg-name').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const email = document.getElementById('reg-email-hidden').value.trim().toLowerCase(); 
         
         if(!name || !phone) return showAlert("Error", "Please fill all details.");
         
         btn.innerText = "Loading...";
-        sendRequest({ action: 'register', name, email, phone }, (res) => {
-            if(res.status === 'success') {
-                currentUser = res.user;
-                renderHome();
-                showScreen('home-screen');
-            } else {
-                showAlert("Error", res.message);
-            }
+
+        const newUser = {
+            name: name,
+            phone: phone,
+            email: email,
+            totalScore: 0,
+            completedLevels: []
+        };
+
+        try {
+            // FAST: Save to Firebase instantly
+            await db.collection('users').doc(email).set(newUser);
+            currentUser = newUser;
+            
+            renderHome();
+            showScreen('home-screen');
             btn.innerText = "Start Playing";
-        });
+
+            // BACKGROUND SYNC: Send new user to Google Sheets silently
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'register', name, email, phone })
+            }).catch(e => console.error("Sheet sync error", e));
+
+        } catch (error) {
+            console.error("Firebase Registration Error: ", error);
+            showAlert("Error", "Could not register. Please try again.");
+            btn.innerText = "Start Playing";
+        }
     }
 
-function renderHome() {
+    // --- 5. GAME UI LOGIC ---
+    function renderHome() {
         document.getElementById('display-name').innerText = currentUser.name;
         document.getElementById('display-score').innerText = currentUser.totalScore;
         const grid = document.getElementById('level-grid'); 
@@ -813,7 +862,6 @@ function renderHome() {
         updateRewardsUI();
     }
 
-    // --- 7. GAME LOGIC ---
     function startLevel(id) {
         currentLevelId = id;
         const cfg = LEVEL_CONFIG.find(l => l.id === id);
@@ -828,7 +876,7 @@ function renderHome() {
     }
 
     function setupMediaScreen(cfg) {
-        showScreen('media-screen'); // Call first
+        showScreen('media-screen');
 
         const iconCon = document.getElementById('media-icon-container');
         const contentArea = document.getElementById('media-content-area');
@@ -847,28 +895,14 @@ function renderHome() {
                 </div>
             `;
             btn.innerText = "Take Quiz";
-        document.getElementById('pdf-trigger').onclick = () => {
-        openPdfPopup(cfg.media); // Call our new popup function
-        
-        // Enable the "Take Quiz" button immediately after opening
-        btn.disabled = false;
-        btn.classList.remove('disabled');
-    };
+            document.getElementById('pdf-trigger').onclick = () => {
+                openPdfPopup(cfg.media);
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+            };
             btn.onclick = () => setupQuizScreen(cfg); 
         } 
         else {
-            let iconClass = cfg.type === 'video' ? 'fa-video' : 'fa-headphones';
-            iconCon.innerHTML = `<i class="fas ${iconClass}" style="font-size:50px; color:#0070c0;"></i>`;
-            
-            if(cfg.type === 'video') {
-                contentArea.innerHTML = `
-                    <video width="100%" height="200" controls autoplay style="border-radius:10px; background:black; max-width:100%;">
-                        <source src="${cfg.media}" type="video/mp4">
-                        Your browser does not support video.
-                    </video>
-                `;
-            } else {
-            // UPDATED: Only show icon for video, remove headset icon for audio
             if (cfg.type === 'video') {
                 iconCon.innerHTML = `<i class="fas fa-video" style="font-size:50px; color:#0070c0;"></i>`;
             } else {
@@ -883,7 +917,6 @@ function renderHome() {
                     </video>
                 `;
             } else {
-                 // UPDATED: Dynamic Image + Enlarged Styling (width:100%; max-width:300px)
                  const audioImg = cfg.img || 'assets/Sensodyne Ramadan Logo.png';
                  contentArea.innerHTML = `
                     <div style="margin-bottom:15px; width:100%; display:flex; justify-content:center;">
@@ -896,10 +929,6 @@ function renderHome() {
                         </audio>
                     </div>`;
             }
-
-            btn.innerText = "Finish Level";
-            btn.onclick = () => completeLevel(cfg.points);
-        }
 
             btn.innerText = "Finish Level";
             btn.onclick = () => completeLevel(cfg.points);
@@ -924,13 +953,13 @@ function renderHome() {
     }
 
     function setupQuizScreen(cfg) {
-        showScreen('quiz-screen'); // FIX: Call BEFORE timer starts
+        showScreen('quiz-screen'); 
 
         document.getElementById('q-text').innerText = cfg.question;
         const optCon = document.getElementById('q-options'); 
         optCon.innerHTML = '';
         
-// Detailer Thumbnail Logic
+        // Detailer Thumbnail Logic
         const thumb = document.getElementById('quiz-detailer-thumb');
         const thumbContainer = document.getElementById('quiz-detailer-container');
         if(cfg.detailer) {
@@ -996,8 +1025,9 @@ function renderHome() {
             }
         }, 1000);
     }
+
     function setupMemoryGame(cfg) { 
-        showScreen('minigame-screen'); // FIX: Call BEFORE timer starts
+        showScreen('minigame-screen'); 
 
         const board = document.getElementById('memory-board');
         board.innerHTML = '';
@@ -1046,17 +1076,31 @@ function renderHome() {
         }, 1000);
     }
 
-    function completeLevel(pointsToAdd) {
+    async function completeLevel(pointsToAdd) {
         if(!currentUser.completedLevels.includes(currentLevelId)) {
             currentUser.completedLevels.push(currentLevelId);
             currentUser.totalScore += pointsToAdd; 
             
-            sendRequest({
-                action: 'saveProgress',
-                email: currentUser.email,
-                totalScore: currentUser.totalScore,
-                completedLevels: currentUser.completedLevels
-            }, (res) => { console.log("Progress Saved"); });
+            try {
+                // 1. FAST: Update Firebase instantly
+                await db.collection('users').doc(currentUser.email).update({
+                    totalScore: currentUser.totalScore,
+                    completedLevels: currentUser.completedLevels
+                });
+            } catch (err) {
+                console.error("Error saving to Firebase", err);
+            }
+
+            // 2. BACKGROUND SYNC: Update Google Sheets silently
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'saveProgress',
+                    email: currentUser.email,
+                    totalScore: currentUser.totalScore,
+                    completedLevels: currentUser.completedLevels
+                })
+            }).catch(e => console.error("Sheet sync error", e));
         }
         
         document.getElementById('final-score').innerText = currentUser.totalScore;
