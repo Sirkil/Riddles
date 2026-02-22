@@ -727,22 +727,37 @@ const firebaseConfig = {
         document.getElementById('detailer-popup').style.display = 'none';
     }
 
-    // --- PDF POPUP & DOWNLOAD LOGIC ---
+// --- PDF POPUP & DOWNLOAD LOGIC ---
     function openPdfPopup(pdfUrl) {
-        // 1. Trigger the file download
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pdfUrl;
-        const fileName = pdfUrl.substring(pdfUrl.lastIndexOf('/') + 1) || 'Sensodyne_Document.pdf';
-        downloadLink.download = fileName;
-        downloadLink.target = '_blank'; 
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-
-        // 2. Open the preview in the iframe
+        // 1. Open the preview in the iframe instantly
         const viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + encodeURIComponent(pdfUrl);
         document.getElementById('pdf-frame').src = viewerUrl;
         document.getElementById('pdf-popup').style.display = 'flex';
+
+        // 2. Force the actual file download in the background (prevents new tab)
+        fetch(pdfUrl)
+            .then(response => response.blob())
+            .then(blob => {
+                // Create a temporary local URL for the downloaded raw data
+                const blobUrl = window.URL.createObjectURL(blob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = blobUrl;
+                
+                // Extract filename or use a default
+                const fileName = pdfUrl.substring(pdfUrl.lastIndexOf('/') + 1) || 'Sensodyne_Document.pdf';
+                downloadLink.download = fileName;
+                
+                // Trigger the hidden download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                // Clean up the DOM and memory
+                document.body.removeChild(downloadLink);
+                window.URL.revokeObjectURL(blobUrl);
+            })
+            .catch(error => {
+                console.error("Error downloading PDF automatically:", error);
+            });
     }
 
     function closePdfPopup() {
