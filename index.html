@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -83,7 +84,7 @@
     /* --- HOME SCREEN SPECIFIC LAYOUT (80/20 SPLIT) --- */
     #home-screen {
         height: 100%;
-        padding: 0 !important; /* Remove default padding to control layout manually */
+        padding: 0 !important;
         justify-content: flex-start;
     }
 
@@ -91,7 +92,7 @@
         height: 80%;
         width: 100%;
         overflow-y: auto;
-        padding: 20px; /* Re-apply padding here */
+        padding: 20px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -110,7 +111,6 @@
         padding-bottom: 10px;
     }
 
-    /* Dedicated stamp for the home screen (Not overlay) */
     .static-home-stamp {
         width: 100%;
         height: 90%;
@@ -130,24 +130,23 @@
         letter-spacing: 0.5px;
     }
 
-    /* --- GLOBAL STAMP (For Login/Register Overlay) --- */
-.claim-stamp {
+    /* --- GLOBAL STAMP --- */
+    .claim-stamp {
         position: absolute;
         bottom: 20px; 
         left: 50%; 
         transform: translateX(-50%);
-        width: 100%; /* Changed to allow full width for two images */
+        width: 100%; 
         height: auto;
         z-index: 1; 
         pointer-events: none; 
         display: none; 
         opacity: 1;
         transition: width 0.3s ease, height 0.3s ease; 
-        text-align: center; /* Centers the images */
+        text-align: center; 
         white-space: nowrap;
     }
 
-    /* New rule for the images */
     .claim-stamp img {
         width: 35vw; 
         height: 35vw;
@@ -155,7 +154,7 @@
         max-height: 120px;
         object-fit: contain;
         display: inline-block;
-        margin: 0 5px; /* Adds small space between the two images */
+        margin: 0 5px; 
     }
 
     /* --- UI ELEMENTS --- */
@@ -619,14 +618,14 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxyAbNkAl7toIm4sGLSP9JBWtbyha4hiPy32crPLBeL3cTrlw5vmUWaSsWDOSxekqeQ/exec"; 
 
     // --- FIREBASE SETUP ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCD_CyrG2jRp1-pFEnQAJlglABoenk2yy4",
-  authDomain: "sensodyne-riddles.firebaseapp.com",
-  projectId: "sensodyne-riddles",
-  storageBucket: "sensodyne-riddles.firebasestorage.app",
-  messagingSenderId: "78042126116",
-  appId: "1:78042126116:web:3903218c3af5a0e71905b1"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyCD_CyrG2jRp1-pFEnQAJlglABoenk2yy4",
+      authDomain: "sensodyne-riddles.firebaseapp.com",
+      projectId: "sensodyne-riddles",
+      storageBucket: "sensodyne-riddles.firebasestorage.app",
+      messagingSenderId: "78042126116",
+      appId: "1:78042126116:web:3903218c3af5a0e71905b1"
+    };
 
     // Initialize Firebase
     if (!firebase.apps.length) {
@@ -634,7 +633,21 @@ const firebaseConfig = {
     }
     const db = firebase.firestore();
 
-    // Updated: Added 'detailer' image paths for levels 9-16
+    // --- SECURE ANONYMOUS AUTHENTICATION ---
+    let currentUid = null;
+
+    // Silently sign the user in anonymously when the page loads
+    firebase.auth().signInAnonymously().catch((error) => {
+        console.error("Anonymous Auth Error:", error.message);
+    });
+
+    // Listen for the auth state to get the UID
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUid = user.uid;
+        }
+    });
+
     const LEVEL_CONFIG = [
         { id: 1, isActive: true, type: 'quiz', detailer: 'assets/detailer_5.png', question: "Which diagnostic tool is recommended by MEA experts for DH assessment?", options: ["Thermal imaging camera", "Cold air blast test using 3-way syringe", "Electric pulp testing only", "Bitewing radiographs"], correct: 2, unlockTime: 60, points: 10 },
         { id: 2, isActive: true, type: 'memory', unlockTime: 60, points: 10 },
@@ -677,7 +690,6 @@ const firebaseConfig = {
         document.getElementById(id).classList.add('active');
         if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
         
-        // Footer & Stamp Logic
         const footer = document.querySelector('.app-footer');
         const globalStamp = document.getElementById('claim-stamp');
         const overlayStampScreens = ['login-screen', 'register-screen', 'home-screen'];
@@ -699,7 +711,6 @@ const firebaseConfig = {
         }
     }
 
-    // --- DIALOGS ---
     function showAlert(title, msg, callback) {
         document.getElementById('alert-title').innerText = title;
         document.getElementById('alert-msg').innerText = msg;
@@ -716,16 +727,12 @@ const firebaseConfig = {
         };
     }
     
-    function closeCustomAlert() {
-        document.getElementById('custom-alert').style.display = 'none';
-    }
-
+    function closeCustomAlert() { document.getElementById('custom-alert').style.display = 'none'; }
     function triggerExitAlert() { document.getElementById('exit-dialog').style.display = 'flex'; }
     function closeExitAlert() { document.getElementById('exit-dialog').style.display = 'none'; }
     function confirmExit() { closeExitAlert(); showScreen('home-screen'); }
     function handleLogout() { if(confirm("Log out?")) location.reload(); }
 
-    // --- DETAILER POPUP LOGIC ---
     function openDetailer(imgSrc) {
         document.getElementById('detailer-img').src = imgSrc;
         document.getElementById('detailer-popup').style.display = 'flex';
@@ -734,22 +741,16 @@ const firebaseConfig = {
         document.getElementById('detailer-popup').style.display = 'none';
     }
 
-// --- PDF POPUP & DOWNLOAD LOGIC ---
     function openPdfPopup(pdfUrl) {
-        // 1. Attach the specific PDF link to the download icon in the header
         document.getElementById('pdf-manual-download').href = pdfUrl;
-
-        // 2. Open the preview in the iframe instantly (keeps user in the app)
         const viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + encodeURIComponent(pdfUrl);
         document.getElementById('pdf-frame').src = viewerUrl;
-        
-        // 3. Show the popup
         document.getElementById('pdf-popup').style.display = 'flex';
     }
 
     function closePdfPopup() {
         document.getElementById('pdf-popup').style.display = 'none';
-        document.getElementById('pdf-frame').src = ""; // clear source to stop memory usage
+        document.getElementById('pdf-frame').src = ""; 
     }
     
     let currentDetailerImg = "";
@@ -757,26 +758,39 @@ const firebaseConfig = {
         if(currentDetailerImg) openDetailer(currentDetailerImg);
     }
 
-    // --- 4. AUTH & DATA LOGIC (Updated to Firebase + Google Sheets) ---
+    // --- 4. AUTH & DATA LOGIC WITH SECURITY ---
     
     async function handleAuth(btn) {
-        // Enforce lowercase to prevent duplicate users (e.g. Test@email.com vs test@email.com)
         const email = document.getElementById('login-email').value.trim().toLowerCase();
         if(!email) return showAlert("Error", "Please enter your email.");
+        if(!currentUid) return showAlert("Error", "Connecting to secure server... Please try again in a moment.");
 
         btn.innerText = "Loading...";
         
         try {
-            // FAST: Check Firebase instantly
-            const userDoc = await db.collection('users').doc(email).get();
+            // SECURE: Search for user by email property, not document ID
+            const snapshot = await db.collection('users').where('email', '==', email).get();
             
-            if (userDoc.exists) {
+            if (!snapshot.empty) {
+                const userDoc = snapshot.docs[0];
                 currentUser = userDoc.data();
+                currentUser.docId = userDoc.id; 
+                
+                // MIGRATION / SECURITY CHECK
+                if (!currentUser.uid) {
+                    // Old user returning: Secure their account with this browser's UID
+                    currentUser.uid = currentUid;
+                    await db.collection('users').doc(currentUser.docId).update({ uid: currentUid });
+                } else if (currentUser.uid !== currentUid) {
+                    // Hacker check: Email is registered to someone else's browser
+                    btn.innerText = "Next";
+                    return showAlert("Security Alert", "This email is registered on another device. You cannot play on someone else's behalf.");
+                }
+
                 renderHome();
                 showScreen('home-screen');
                 btn.innerText = "Next";
 
-                // BACKGROUND SYNC: Update Google Sheets silently
                 fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'login', email: email })
@@ -804,6 +818,7 @@ const firebaseConfig = {
         btn.innerText = "Loading...";
 
         const newUser = {
+            uid: currentUid, // Save the secret browser ID
             name: name,
             phone: phone,
             email: email,
@@ -812,15 +827,15 @@ const firebaseConfig = {
         };
 
         try {
-            // FAST: Save to Firebase instantly
-            await db.collection('users').doc(email).set(newUser);
+            // SECURE: Save user using their secret UID as the document ID
+            await db.collection('users').doc(currentUid).set(newUser);
             currentUser = newUser;
+            currentUser.docId = currentUid; // Keep track of their specific document ID
             
             renderHome();
             showScreen('home-screen');
             btn.innerText = "Start Playing";
 
-            // BACKGROUND SYNC: Send new user to Google Sheets silently
             fetch(API_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'register', name, email, phone })
@@ -936,7 +951,6 @@ const firebaseConfig = {
             btn.onclick = () => completeLevel(cfg.points);
         }
 
-        // TIMER LOGIC
         let timeLeft = cfg.unlockTime || 10;
         timerDisplay.innerText = timeLeft;
         if(timerInterval) clearInterval(timerInterval);
@@ -961,7 +975,6 @@ const firebaseConfig = {
         const optCon = document.getElementById('q-options'); 
         optCon.innerHTML = '';
         
-        // Detailer Thumbnail Logic
         const thumb = document.getElementById('quiz-detailer-thumb');
         const thumbContainer = document.getElementById('quiz-detailer-container');
         if(cfg.detailer) {
@@ -1011,7 +1024,6 @@ const firebaseConfig = {
             optCon.appendChild(btn);
         });
 
-        // Timer Display
         const timerDisplay = document.getElementById('quiz-timer');
         let timeLeft = cfg.unlockTime || 60;
         timerDisplay.innerText = timeLeft;
@@ -1084,8 +1096,8 @@ const firebaseConfig = {
             currentUser.totalScore += pointsToAdd; 
             
             try {
-                // 1. FAST: Update Firebase instantly
-                await db.collection('users').doc(currentUser.email).update({
+                // SECURE: Update using the secure document ID (UID), not the email
+                await db.collection('users').doc(currentUser.docId).update({
                     totalScore: currentUser.totalScore,
                     completedLevels: currentUser.completedLevels
                 });
@@ -1093,7 +1105,6 @@ const firebaseConfig = {
                 console.error("Error saving to Firebase", err);
             }
 
-            // 2. BACKGROUND SYNC: Update Google Sheets silently
             fetch(API_URL, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -1124,7 +1135,6 @@ const firebaseConfig = {
         }
     }
 
-    // Initialize logic
     showScreen('login-screen');
 </script>
 </body>
