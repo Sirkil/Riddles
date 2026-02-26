@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Sensodyne Ramadan Riddles</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+ <style>
+    /* --- FONT FACE --- */
+    @font-face {
+        font-family: 'Gilroy';
+        src: url('assets/Gilroy-ExtraBold.ttf') format('opentype'),
+             url('assets/Gilroy-Light.ttf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    /* --- CONFIGURATION --- */
+    :root {
+        --primary: #0070c0;   
+        --dark-blue: #003366; 
+        --accent: #00d2ff;    
+        --text-color: #ffffff;
+        
+        --bg-image: url('assets/background.png'); 
+        --logo-image: url('assets/Sensodyne Ramadan Logo.png'); 
+        --header-pattern: url('assets/top_pattern.png'); 
+        --star-icon: url('assets/star_icon.png'); 
+        --done-icon: url('assets/done_icon.png'); 
+        --claim-stamp: url('assets/claim_stamp.png');
+    }
+
+    /* --- GLOBAL STYLES --- */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+        font-family: 'Gilroy', 'Segoe UI', Tahoma, sans-serif;
+        background: var(--dark-blue) var(--bg-image) no-repeat center center fixed;
+        background-size: cover;
+        margin: 0; padding: 0;
+        color: var(--text-color);
+        height: 100dvh;
+        width: 100vw;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        overscroll-behavior: none; 
+        user-select: none; 
+    }
+
+    .app-container {
+        width: 100%; max-width: 450px;
+        height: 100%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        padding-top: env(safe-area-inset-top);
+        scrollbar-width: none; 
+        -ms-overflow-style: none;
+    }
+    .app-container::-webkit-scrollbar { display: none; }
+
+    .screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        flex: 1; 
+        padding: 20px;
+        animation: fadeIn 0.4s ease-in-out;
+        position: relative;
+        z-index: 5; 
+    }
+
+    .screen.active { display: flex; }
+
+    /* --- HOME SCREEN SPECIFIC LAYOUT (80/20 SPLIT) --- */
+    #home-screen {
+        height: 100%;
+        padding: 0 !important;
+        justify-content: flex-start;
+    }
+
+    .home-content-wrapper {
+        height: 80%;
+        width: 100%;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        scrollbar-width: none;
+    }
+    .home-content-wrapper::-webkit-scrollbar { display: none; }
+
+    .stamp-footer-area {
+        height: 20%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        z-index: 10;
+        padding-bottom: 10px;
+    }
+
+    .static-home-stamp {
+        width: 100%;
+        height: 90%;
+        max-height: 140px;
+        background: var(--claim-stamp img) no-repeat center;
+        background-size: contain;
+    }
+
+    /* --- FOOTER --- */
+    .app-footer {
+        width: 100%;
+        padding: 15px 25px;
+        text-align: center;
+        color: rgba(255, 255, 255, 1);
+        font-size: 6px;
+        font-weight: normal;
+        letter-spacing: 0.5px;
+    }
+
+    /* --- GLOBAL STAMP --- */
+    .claim-stamp {
+        position: absolute;
+        bottom: 20px; 
+        left: 50%; 
+        transform: translateX(-50%);
+        width: 100%; 
+        height: auto;
+        z-index: 1; 
+        pointer-events: none; 
+        display: none; 
+        opacity: 1;
+        transition: width 0.3s ease, height 0.3s ease; 
+        text-align: center; 
+        white-space: nowrap;
+    }
+
+    .claim-stamp img {
+        width: 35vw; 
+        height: 35vw;
+        max-width: 120px; 
+        max-height: 120px;
+        object-fit: contain;
+        display: inline-block;
+        margin: 0 5px; 
+    }
+
+    /* --- UI ELEMENTS --- */
+    .logo {
+        width: 300px; height: 120px; 
+        background: var(--logo-image) no-repeat center;
+        background-size: contain;
+        margin: 20px 0; flex-shrink: 0;
+    }
+
+    .input-group { 
+        width: 85%; margin-bottom: 15px; 
+        position: relative; z-index: 10; 
+    }
+    
+    input {
+        width: 100%;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 12px;
+        padding: 14px 15px;
+        color: white;
+        font-family: 'Gilroy', sans-serif;
+        font-size: 16px;
+        outline: none; text-align: center;
+        transition: 0.3s;
+        appearance: none; 
+    }
+    input:focus { border-color: #fff; background: rgba(255,255,255,0.2); }
+    input::placeholder { color: #e0e0e0; opacity: 1; }
+
+    .btn {
+        width: 85%; padding: 12px;
+        background: linear-gradient(180deg, #0099cc 0%, #0056b3 100%);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 20px 0 20px 0;
+        color: white; font-family: 'Gilroy', sans-serif;
+        font-size: 18px; font-weight: bold; cursor: pointer;
+        margin-top: 10px; transition: all 0.2s;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        display: flex; justify-content: center; align-items: center; gap: 10px;
+        text-decoration: none;
+        position: relative; z-index: 10; 
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled, .btn.disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; transform: none; pointer-events: none; }
+    
+    .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.5); margin-top: 10px; }
+    
+    .btn-icon-only {
+        width: 50px; height: 50px;
+        padding: 0; border-radius: 12px;
+        display: flex; justify-content: center; align-items: center;
+        font-size: 20px;
+    }
+
+    .link-text {
+        color: #00d2ff; text-decoration: underline; cursor: pointer; margin-top: 15px; font-size: 14px;
+        position: relative; z-index: 10;
+    }
+
+    /* --- NAVIGATION --- */
+    .nav-header {
+        width: 100%; display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 10px; padding: 0 5px; height: 50px; flex-shrink: 0;
+    }
+    .back-btn {
+        background: rgba(255,255,255,0.2); border: none; color: white;
+        width: 40px; height: 40px; border-radius: 50%;
+        display: flex; justify-content: center; align-items: center;
+        cursor: pointer; font-size: 18px;
+    }
+
+    /* --- TIMER --- */
+    .timer-circle {
+        width: 45px; height: 45px;
+        background: #0070c0;
+        border: 2px solid white;
+        border-radius: 50%;
+        color: white;
+        display: flex; justify-content: center; align-items: center;
+        font-weight: bold; font-size: 16px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    /* --- HEADER --- */
+    .header-banner {
+        width: 100%; height: 90px; 
+        background: linear-gradient(180deg, #0056b3 0%, #0070c0 100%);
+        border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+        position: relative; margin-bottom: 20px; flex-shrink: 0;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2); overflow: visible; z-index: 10;
+    }
+    .header-pattern {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background-image: var(--header-pattern);
+        background-repeat: repeat; background-position: center; background-size: cover; 
+        opacity: 0.5;
+        border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+        z-index: 1; pointer-events: none;
+    }
+    .header-content {
+        position: relative; z-index: 2;
+        display: flex; justify-content: space-between; align-items: center;
+        height: 100%; padding: 0 25px; padding-top: 5px;
+    }
+    .user-info { flex: 1; text-align: left; }
+    
+    .logo-center {
+        width: 140px; 
+        height: 85px; 
+        background: var(--logo-image) no-repeat center;
+        background-size: contain; flex: 0 0 140px;
+    }
+    
+    .score-container { flex: 1; display: flex; justify-content: flex-end; align-items: center;}
+    .score-pill {
+        background: rgba(0, 153, 204, 0.9);
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: 20px; padding: 5px 12px;
+        display: flex; align-items: center; gap: 6px;
+        font-weight: bold; font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* --- HOME ACTIONS --- */
+    .home-actions {
+        display: flex; gap: 10px; width: 90%; justify-content: center;
+        margin-top: 10px; margin-bottom: 40px;
+        position: relative; z-index: 10;
+    }
+
+    /* --- LEVEL GRID --- */
+    .level-grid {
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 10px; width: 100%; padding: 0 5px 5px 5px; 
+        position: relative; z-index: 10;
+        height: 70%;
+    }
+
+    .level-btn {
+        width: 85%;
+        margin: 0 auto;
+        aspect-ratio: 1;
+        background: linear-gradient(135deg, #0070c0, #0056b3);
+        border-radius: 16px;
+        position: relative; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+        cursor: pointer;
+        border: 1px solid rgba(255,255,255,0.1);
+        overflow: hidden;
+    }
+    
+    .level-icon-img {
+        position: absolute;
+        width: 85%;  
+        height: 85%;
+        object-fit: contain;
+        left: 5px;   
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;  
+        opacity: 0.9;
+    }
+
+    .level-btn span {
+        position: relative;
+        z-index: 3;  
+        font-size: 24px; 
+        font-weight: 800;
+        margin-left: 15px; 
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .level-btn.locked { opacity: 0.6; box-shadow: none; pointer-events: none;}
+    .level-btn.completed { background: white; border: 2px solid #FFD700; color: #0070c0; }
+    .star-img { width: 60%; height: 60%; background: var(--star-icon) no-repeat center; background-size: contain; }
+
+    /* --- MEMORY GAME --- */
+    .memory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; width: 100%; }
+    .memory-card { 
+        background: #0070c0; aspect-ratio: 1; border-radius: 8px; 
+        cursor: pointer; display:flex; justify-content:center; align-items:center; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .memory-card.flipped { background: white; border: 2px solid #0070c0; }
+    .memory-card img { width: 80%; height: 80%; object-fit: contain; display: none; }
+    .memory-card.flipped img { display: block; }
+
+    /* --- CONTENT CARDS --- */
+    .content-card {
+        background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; width: 95%;
+        text-align: center; color: #333; margin-top: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .quiz-opt {
+        background: white; border: none; color: #0070c0; 
+        padding: 14px; border-radius: 16px 0 16px 0; width: 100%; margin-bottom: 10px;
+        font-size: 15px; font-weight: bold; cursor: pointer;
+        text-align: center; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: flex; justify-content: center; align-items: center;
+        min-height: 50px; 
+    }
+    .quiz-opt:active, .quiz-opt.selected { background: #0070c0; color: white; transform: scale(0.98); }
+    
+    .quiz-question-box {
+        background: linear-gradient(135deg, #002244, #0056b3); padding: 20px; border-radius: 16px; 
+        margin-bottom: 20px; width: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .quiz-question-box h3 {
+        margin: 0; text-align: center; font-weight: 600; line-height: 1.3;
+        font-size: clamp(14px, 4vw, 18px); 
+        word-wrap: break-word;
+    }
+    .detailer-trigger {
+        width: 100%;
+        text-align: right;
+        margin-top: 10px;
+    }
+    .detailer-trigger span {
+        font-size: 12px;
+        color: #00d2ff;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    /* --- PDF SPECIFIC --- */
+    .pdf-link-btn {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: #f0f0f0; border: 2px solid #0070c0; border-radius: 16px;
+        padding: 15px; width: 100%; text-decoration: none; color: #0070c0;
+        font-weight: bold; transition: 0.2s; margin: 15px 0; cursor: pointer;
+    }
+    .pdf-link-btn:active { background: #e0e0e0; transform: scale(0.98); }
+    .pdf-icon-img { width: 40px; height: 40px; margin-bottom: 8px; object-fit: contain; }
+
+    /* --- DONE SCREEN --- */
+    .done-card {
+        border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 30px 20px; width: 90%;
+        text-align: center; background: transparent; box-shadow: none;
+    }
+    .done-icon-large {
+        width: 100px; height: 100px; background: var(--done-icon) no-repeat center; 
+        background-size: contain; margin: 0 auto 15px auto;
+    }
+    
+    /* --- DIALOGS --- */
+    .dialog-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); display: none;
+        justify-content: center; align-items: center; z-index: 999;
+        backdrop-filter: blur(5px);
+    }
+    .dialog-box {
+        background: linear-gradient(135deg, #0070c0, #004a99);
+        width: 85%; padding: 25px; border-radius: 24px;
+        text-align: center; border: 1px solid rgba(255,255,255,0.3);
+        position: relative;
+    }
+    .close-dialog {
+        position: absolute; top: 15px; right: 20px; 
+        color: white; font-size: 24px; cursor: pointer;
+    }
+    .reward-item {
+        background: rgba(255,255,255,0.1); margin: 8px 0; padding: 12px;
+        border-radius: 12px; display: flex; align-items: center; gap: 12px;
+        opacity: 0.5; transition: 0.3s; text-align: left;
+    }
+    .reward-item.unlocked { opacity: 1; background: rgba(255,255,255,0.2); border: 1px solid #FFD700; }
+    .reward-icon { font-size: 22px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+ </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div id="login-screen" class="screen" style="justify-content: center;">
+        <div class="logo"></div>
+        <h3 style="margin-bottom:15px;" data-i18n="welcome">Bienvenue</h3>
+        <div class="input-group"><input type="email" id="login-email" data-i18n-ph="email_ph" placeholder="Entrez votre e-mail"></div>
+        <button class="btn" id="btn-login" onclick="handleAuth(this)" data-i18n="next">Suivant</button>
+        <div class="app-footer"></div>
+    </div>
+
+    <div id="register-screen" class="screen" style="justify-content: center; bottom: 30px;">
+        <div class="logo"></div>
+        <h3 style="margin:0 0 20px 0;" data-i18n="complete_profile">Compléter le profil</h3>
+        <div class="input-group"><input type="text" id="reg-name" data-i18n-ph="name_ph" placeholder="Nom complet"></div>
+        <div class="input-group"><input type="tel" id="reg-phone" data-i18n-ph="phone_ph" placeholder="Numéro de téléphone"></div>
+        <input type="hidden" id="reg-email-hidden"> 
+        <button class="btn" id="btn-register" onclick="handleRegister(this)" data-i18n="start_playing">Commencer à jouer</button>
+        <div class="link-text" onclick="showScreen('login-screen')" data-i18n="back">Retour</div>
+        <div class="app-footer"></div>
+    </div>
+
+    <div id="home-screen" class="screen">
+        <div class="home-content-wrapper">
+            <div class="header-banner">
+                <div class="header-pattern"></div>
+                <div class="header-content">
+                    <div class="user-info">
+                        <div style="font-size:12px; opacity:0.8; margin-bottom:2px;" data-i18n="hello">Bonjour !</div>
+                        <div id="display-name" style="font-size:14px; font-weight:bold; line-height:1.1;" data-i18n="player">Joueur</div>
+                    </div>
+                    <div class="logo-center"></div>
+                    <div class="score-container">
+                        <div class="score-pill" onclick="openRewards()" style="cursor: pointer;">
+                            <span>⭐</span> <span id="display-score">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="level-grid" id="level-grid"></div>
+
+            <div class="home-actions">
+                <button class="btn" style="flex: 2; margin-top:0;" onclick="openRewards()" data-i18n="giveaways">Cadeaux</button>
+                <button class="btn btn-secondary btn-icon-only" style="margin-top:0;" onclick="handleLogout()"><i class="fa fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+
+        <div class="stamp-footer-area">
+            <div class="static-home-stamp"></div>
+        </div>
+    </div>
+
+    <div id="media-screen" class="screen">
+        <div class="nav-header">
+            <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+            <div id="media-timer" class="timer-circle">60</div>
+        </div>
+        
+        <div class="logo" style="transform:scale(0.8); margin-top:0; margin-bottom:10px;"></div>
+        <div class="content-card">
+            <div id="media-icon-container" style="margin-bottom:10px; display:flex; justify-content:center;"></div>
+            <div id="media-content-area"></div>
+        </div>
+        
+        <button id="media-next-btn" class="btn disabled" style="margin-top:auto; margin-bottom:20px;" data-i18n="please_wait" disabled>
+            Veuillez patienter...
+        </button>
+    </div>
+
+<div id="quiz-screen" class="screen" style="justify-content:center;">
+        <div class="nav-header">
+            <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+            <div id="quiz-timer" class="timer-circle">60</div>
+        </div>
+
+        <div class="logo" style="transform:scale(0.6); margin-bottom:30px; margin-top:0;"></div>
+        
+        <div id="quiz-detailer-container" style="display:none; position: relative; width: fit-content; margin: 0 auto 15px auto; cursor: pointer;" onclick="triggerDetailer()">
+    <img id="quiz-detailer-thumb" src="" 
+         style="max-width: 250px; max-height: 250px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: block;" 
+         alt="Detailer Snapshot">
+    <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.65); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+        <i class="fa fa-expand"></i>
+    </div>
+</div>
+
+        <div class="quiz-question-box">
+            <h3 id="q-text">Question?</h3>
+            </div>
+        <div id="q-options" style="width:100%;"></div>
+    </div>
+
+    <div id="minigame-screen" class="screen">
+        <div class="nav-header">
+            <button class="back-btn" onclick="triggerExitAlert()"><i class="fa fa-arrow-left"></i></button>
+            <div id="memory-timer" class="timer-circle">60</div>
+        </div>
+        <div class="logo" style="transform:scale(0.7); margin:0 0;"></div>
+        <h2 style="margin: 10px 0; font-size: 20px;" data-i18n="memory_match">Jeu de mémoire</h2>
+        
+        <div id="memory-board" class="memory-grid"></div>
+    </div>
+
+    <div id="done-screen" class="screen" style="justify-content:center;">
+        <div class="logo" style="margin-bottom:30px;"></div>
+        <div class="done-card">
+            <div class="done-icon-large"></div>
+            <h1 class="done-text" data-i18n="done">TERMINÉ</h1>
+            <p class="done-score"><span data-i18n="total_score">Score total : </span><span id="final-score" style="font-weight:bold; color:white;"></span></p>
+            <button class="btn" style="width:100%;" onclick="showScreen('home-screen')" data-i18n="ok">OK</button>
+        </div>
+    </div>
+
+    <div id="claim-stamp" class="claim-stamp">
+        <img src="assets/claim_3.png" alt="Claim 3">
+        <img src="assets/claim_1.png" alt="Claim 1">
+        <img src="assets/claim_2.png" alt="Claim 2">
+    </div>
+
+    <div class="app-footer">
+        <Pm-Code>PM-EG-SENO-26-00001</Pm-Code>
+    </div>
+
+</div>
+
+<div id="rewards-dialog" class="dialog-overlay" onclick="closeRewards()">
+    <div class="dialog-box" onclick="event.stopPropagation()">
+        <span class="close-dialog" onclick="closeRewards()">&times;</span>
+        <h2 style="margin-top:0; color:white;" data-i18n="your_giveaways">Vos cadeaux</h2>
+        <div class="reward-item" id="rwd-1">
+            <div class="reward-icon">🔒</div>
+            <div><b data-i18n="giveaways">Cadeaux</b><br><span style="font-size:12px;" data-i18n="earn_points">Gagnez 200 points</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="detailer-popup" class="dialog-overlay" onclick="closeDetailer()">
+    <div class="dialog-box" onclick="event.stopPropagation()" style="width:95%; max-width:500px; padding:15px;">
+        <span class="close-dialog" onclick="closeDetailer()" style="top:5px; right:10px;">&times;</span>
+        <img id="detailer-img" src="" style="width:100%; height:auto; border-radius:10px; margin-top:5px;" alt="Detailer Info">
+    </div>
+</div>
+
+<div id="exit-dialog" class="dialog-overlay">
+    <div class="dialog-box" onclick="event.stopPropagation()">
+        <h3 style="margin-top:0; color:white;" data-i18n="exit_level">Quitter le niveau ?</h3>
+        <p style="color:rgba(255,255,255,0.8); margin-bottom:25px;" data-i18n="exit_desc">Votre progression pour ce niveau sera perdue.</p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="flex:1;" onclick="confirmExit()" data-i18n="exit_btn">Quitter</button>
+            <button class="btn btn-secondary" style="flex:1; margin-top:0;" onclick="closeExitAlert()" data-i18n="cancel">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<div id="pdf-popup" class="dialog-overlay" onclick="closePdfPopup()">
+    <div class="dialog-box" onclick="event.stopPropagation()" style="width:95%; height:85%; max-width:600px; padding:15px; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="margin:0; color:white;" data-i18n="document">Document</h3>
+            
+            <div style="display:flex; gap: 20px; align-items: center;">
+                <a id="pdf-manual-download" href="" target="_blank" download style="color:#00d2ff; font-size:22px; text-decoration:none;">
+                    <i class="fa fa-download"></i>
+                </a>
+                <span style="font-size:28px; color:white; cursor:pointer; line-height:1;" onclick="closePdfPopup()">&times;</span>
+            </div>
+
+        </div>
+        <iframe id="pdf-frame" src="" style="width:100%; flex:1; border-radius:10px; border:none; background:white;"></iframe>
+    </div>
+</div>
+
+<div id="custom-alert" class="dialog-overlay">
+    <div class="dialog-box" onclick="event.stopPropagation()">
+        <h3 id="alert-title" style="margin-top:0; color:white;">Alerte</h3>
+        <p id="alert-msg" style="color:rgba(255,255,255,0.9); margin-bottom:25px;"></p>
+        <button class="btn" onclick="closeCustomAlert()" data-i18n="ok">OK</button>
+    </div>
+</div>
+
+<script>
+    // --- 0. TRANSLATION DICTIONARY (French Only) ---
+    const i18n = {
+        fr: {
+            welcome: "Bienvenue",
+            email_ph: "Entrez votre e-mail",
+            next: "Suivant",
+            complete_profile: "Compléter le profil",
+            name_ph: "Nom complet",
+            phone_ph: "Numéro de téléphone",
+            start_playing: "Commencer à jouer",
+            back: "Retour",
+            hello: "Bonjour !",
+            player: "Joueur",
+            giveaways: "Cadeaux",
+            read_doc: "Lisez le document pour terminer le niveau.",
+            view_pdf: "Appuyez pour voir le PDF",
+            take_quiz: "Faire le quiz",
+            finish_level: "Terminer le niveau",
+            please_wait: "Veuillez patienter...",
+            memory_match: "Jeu de mémoire",
+            done: "TERMINÉ",
+            total_score: "Score total : ",
+            ok: "OK",
+            your_giveaways: "Vos cadeaux",
+            earn_points: "Gagnez 200 points",
+            congrats: "Félicitations !",
+            score_msg: "Votre score est de 200, restez à l'écoute pour votre récompense",
+            exit_level: "Quitter le niveau ?",
+            exit_desc: "Votre progression pour ce niveau sera perdue.",
+            exit_btn: "Quitter",
+            cancel: "Annuler",
+            document: "Document",
+            alert: "Alerte",
+            err_email: "Veuillez entrer votre e-mail.",
+            err_server: "Connexion au serveur sécurisé... Veuillez réessayer dans un instant.",
+            loading: "Chargement...",
+            err_device: "Cet e-mail est enregistré sur un autre appareil. Vous ne pouvez pas jouer au nom de quelqu'un d'autre.",
+            security_alert: "Alerte de sécurité",
+            err_conn: "Erreur de connexion. Veuillez réessayer.",
+            err: "Erreur",
+            err_fill: "Veuillez remplir tous les champs.",
+            err_reg: "Impossible de s'inscrire. Veuillez réessayer.",
+            wrong_ans: "Mauvaise réponse !",
+            wrong_trial: "Vous avez mal répondu. Il vous reste un essai.",
+            wrong_zero: "Vous avez gagné 0 point pour ce niveau.",
+            logout: "Se déconnecter ?"
+        }
+    };
+
+    let appLang = 'fr';
+
+    function setLanguage(lang) {
+        appLang = lang;
+        
+        // Update all standard text elements
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[lang][key]) {
+                el.innerHTML = i18n[lang][key]; 
+            }
+        });
+        
+        // Update input placeholders
+        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+            const key = el.getAttribute('data-i18n-ph');
+            if (i18n[lang][key]) {
+                el.placeholder = i18n[lang][key]; 
+            }
+        });
+
+        // Navigate to login
+        showScreen('login-screen');
+    }
+
+    // --- 1. CONFIGURATION ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbxyAbNkAl7toIm4sGLSP9JBWtbyha4hiPy32crPLBeL3cTrlw5vmUWaSsWDOSxekqeQ/exec"; 
+
+    // --- FIREBASE SETUP ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyCD_CyrG2jRp1-pFEnQAJlglABoenk2yy4",
+      authDomain: "sensodyne-riddles.firebaseapp.com",
+      projectId: "sensodyne-riddles",
+      storageBucket: "sensodyne-riddles.firebasestorage.app",
+      messagingSenderId: "78042126116",
+      appId: "1:78042126116:web:3903218c3af5a0e71905b1"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    // --- SECURE ANONYMOUS AUTHENTICATION ---
+    let currentUid = null;
+
+    firebase.auth().signInAnonymously().catch((error) => {
+        console.error("Anonymous Auth Error:", error.message);
+    });
+
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUid = user.uid;
+        }
+    });
+
+    const LEVEL_CONFIG = [
+        { id: 1, isActive: true, type: 'quiz', detailer: 'assets/detailer_5.png', 
+          question: { fr: "Quel outil de diagnostic est recommandé par les experts de la région MEA pour l'évaluation de l'HD ?" }, 
+          options: { fr: ["Caméra à imagerie thermique", "Test au jet d'air froid à l'aide d'une seringue à 3 voies", "Test de vitalité pulpaire électrique uniquement", "Radiographies rétrocoronaires (Bitewing)"] }, 
+          correct: 2, unlockTime: 60, points: 10 },
+        { id: 2, isActive: true, type: 'memory', unlockTime: 60, points: 10 },
+        { id: 3, isActive: true, type: 'quiz', detailer: 'assets/detailer_13.png', 
+          question: { fr: "Selon le contenu, l'HD a un impact négatif sur la qualité de vie des patients en :" }, 
+          options: { fr: ["Améliorant les habitudes d'hygiène bucco-dentaire", "Affectant les aspects émotionnels, sociaux et fonctionnels", "Augmentant l'appétit", "Réduisant les visites chez le dentiste"] }, 
+          correct: 2, unlockTime: 60, points: 10 },
+        { id: 4, isActive: true, type: 'pdf', media: 'https://riddles-1zcx.onrender.com/Sensodyne%20LB1%20_Rapid_EG_whatsapp%20FINAL.pdf', unlockTime: 60, 
+          question: { fr: "L'occlusion des tubuli dentinaires aide à réduire la sensibilité en :" }, 
+          options: { fr: ["Blanchissant la surface de l'émail", "Bloquant le mouvement des fluides à l'intérieur des tubuli", "Augmentant la production de salive", "Renforçant le tissu gingival"] }, 
+          correct: 2, points: 10 },
+        { id: 5, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/Dr%20Manal%20Podcast.mp4', unlockTime: 420, points: 10 },
+        { id: 6, isActive: true, type: 'quiz', detailer: 'assets/detailer_16.png', 
+          question: { fr: "L'HD a tendance à réapparaître si :" }, 
+          options: { fr: ["Le patient n'utilise que des hydropulseurs", "Les agents désensibilisants sont arrêtés", "Du dentifrice fluoré est utilisé quotidiennement", "Les patients consomment des boissons chaudes"] }, 
+          correct: 2, unlockTime: 60, points: 10 },
+        { id: 7, isActive: true, type: 'quiz', detailer: 'assets/detailer_10.png', 
+          question: { fr: "Quel pourcentage de patients atteints d'HD ne mentionnent généralement PAS leur affection aux dentistes ?" }, 
+          options: { fr: ["10 %", "25 %", "50 %", "75 %"] }, 
+          correct: 3, unlockTime: 60, points: 10 },
+        { id: 8, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/Dr%20Hesham%20Podcast.mp4', unlockTime: 420, points: 10 },
+        { id: 9, isActive: true, type: 'quiz', detailer: 'assets/detailer_9.png', 
+          question: { fr: "Selon les experts de la région MEA (2024), le dépistage de l'HD doit être effectué pour :" }, 
+          options: { fr: ["Uniquement les patients à haut risque", "Les patients présentant une perte d'émail visible", "Tous les patients visitant les cliniques dentaires", "Les patients se plaignant de maux de dents"] }, 
+          correct: 3, unlockTime: 60, points: 10 },
+        { id: 10, isActive: true, type: 'pdf', media: 'https://www.weebly.com/uploads/2/3/2/2/23222332/custom_themes/464933049751344157/files/sensodyne/Algorithm_V5RGY.pdf', unlockTime: 60, 
+          question: { fr: "Selon l'algorithme de diagnostic présenté, quel test est recommandé comme test de diagnostic basé sur un stimulus pour l'hypersensibilité dentinaire ?" }, 
+          options: { fr: ["Test de percussion", "Test à l'air froid à l'aide d'une seringue à 3 voies", "Test de vitalité pulpaire électrique", "Test de morsure avec un rouleau de coton"] }, 
+          correct: 2, points: 10 },
+        { id: 11, isActive: true, type: 'quiz', detailer: 'assets/detailer_11.png', 
+          question: { fr: "Le score de '3' sur l'échelle de Schiff indique :" }, 
+          options: { fr: ["Inconfort léger sans demande d'arrêt", "Aucune réponse au stimulus", "Le patient demande l'arrêt et considère le stimulus comme douloureux", "Sensibilité normale"] }, 
+          correct: 3, unlockTime: 60, points: 10 },
+        { id: 12, isActive: true, type: 'quiz', detailer: 'assets/detailer_12.png', 
+          question: { fr: "La première étape de l'algorithme de prise en charge de l'HD de la région MEA est :" }, 
+          options: { fr: ["Thérapie au laser", "Éducation du patient et modification du comportement", "Vernis fluoré", "Greffe gingivale"] }, 
+          correct: 2, unlockTime: 60, points: 10 },
+        { id: 13, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/Dr%20Nour%20Podcast.mp4', unlockTime: 420, points: 10 },
+        { id: 14, isActive: true, type: 'quiz', detailer: 'assets/detailer_14.png', 
+          question: { fr: "Un obstacle majeur empêchant un diagnostic correct de l'HD est :" }, 
+          options: { fr: ["Temps de diagnostic excessif", "Surestimation de l'importance de l'HD", "Manque de dépistage proactif", "Coût élevé des outils de diagnostic"] }, 
+          correct: 3, unlockTime: 60, points: 10 },
+        { id: 15, isActive: true, type: 'quiz', detailer: 'assets/detailer_15.png', 
+          question: { fr: "Pour les patients asymptomatiques qui répondent « NON » à la sensibilité, la prochaine étape est :" }, 
+          options: { fr: ["Commencer un traitement immédiat en cabinet", "Utiliser le questionnaire DHEQ-15", "Effectuer un test au jet d'air froid", "Aucune évaluation supplémentaire"] }, 
+          correct: 3, unlockTime: 60, points: 10 },
+        { id: 16, isActive: true, type: 'quiz', 
+          question: { fr: "Cas : Un homme de 45 ans se présente pour un nettoyage de routine. À la question : « Avez-vous des dents sensibles ? », il répond « Non ». Une légère abrasion cervicale est présente. Aucune utilisation préalable de dentifrice désensibilisant.\nQuestion 2 : Selon l'algorithme de l'HD de la région MEA, quelle est la prochaine étape recommandée ?" }, 
+          options: { fr: ["Commencer immédiatement un dentifrice désensibilisant", "Administrer le questionnaire DHEQ-15", "Effectuer un test au jet d'air froid", "Aucune évaluation supplémentaire requise"] }, 
+          correct: 3, unlockTime: 60, points: 10 },
+        { id: 17, isActive: true, type: 'quiz', 
+          question: { fr: "Cas : Une patiente de 32 ans signale une douleur aiguë et brève lorsqu'elle boit de l'eau froide. Elle pensait que c'était normal et n'en a jamais parlé. L'examen clinique ne montre ni caries ni fractures. Le test au jet d'air froid déclenche une douleur immédiate et elle demande l'arrêt.\nQuestion 1 : Selon l'échelle de Schiff, quel score représente le mieux sa réponse ?" }, 
+          options: { fr: ["Aucune réponse", "Répond mais ne demande pas l'arrêt", "S'éloigne ou demande l'arrêt", "Douleur sévère et arrêt immédiat"] }, 
+          correct: 4, unlockTime: 60, points: 10 },
+        { id: 18, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/1.mp4', unlockTime: 60, points: 10 },
+        { id: 19, isActive: true, type: 'quiz', 
+          question: { fr: "Cas : Une patiente de 41 ans signale une gêne lors du brossage et dit avoir commencé à éviter de brosser les zones cervicales car « la douleur est trop aiguë ». Elle n'a ni caries actives ni fractures. Elle n'a jamais utilisé de dentifrice désensibilisant. Un test au jet d'air froid montre une réponse claire, mais elle ne demande pas l'arrêt du stimulus.\nQuestion 3 : Selon les recommandations de dépistage et de diagnostic de la région MEA, quelle est l'étape suivante la plus appropriée pour cette patiente ?" }, 
+          options: { fr: ["Commencer immédiatement la thérapie au laser", "Lui prescrire un dentifrice désensibilisant quotidien et fournir des conseils de modification du comportement", "Passer directement au traitement restaurateur", "Aucun traitement nécessaire car les symptômes sont légers"] }, 
+          correct: 2, unlockTime: 60, points: 10 },
+        { id: 20, isActive: true, type: 'video', media: 'https://riddles-1zcx.onrender.com/2.mp4', unlockTime: 60, points: 10 }
+    ];
+
+    // --- 2. APP STATE ---
+    let currentUser = {
+        name: "", email: "", phone: "", totalScore: 0, completedLevels: [] 
+    };
+    
+    let currentLevelId = 0;
+    let timerInterval = null;
+
+    // --- 3. NAVIGATION & UI ---
+    function showScreen(id) {
+       document.querySelectorAll('audio, video').forEach(media => {
+            media.pause();
+            media.currentTime = 0;
+        });
+
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id !== 'media-screen' && timerInterval) clearInterval(timerInterval);
+        
+        const footer = document.querySelector('.app-footer');
+        const globalStamp = document.getElementById('claim-stamp');
+        const overlayStampScreens = ['login-screen', 'register-screen', 'home-screen'];
+        
+        if (overlayStampScreens.includes(id)) {
+            if(footer) footer.style.display = 'none';
+            if(globalStamp) {
+                globalStamp.style.display = 'block';
+                globalStamp.classList.remove('small-mode');
+            }
+        } 
+        else if (id === 'home-screen') {
+            if(footer) footer.style.display = 'none';
+            if(globalStamp) globalStamp.style.display = 'none';
+        } 
+        else {
+            if(footer) footer.style.display = 'block';
+            if(globalStamp) globalStamp.style.display = 'none';
+        }
+    }
+
+    function showAlert(title, msg, callback) {
+        document.getElementById('alert-title').innerText = title;
+        document.getElementById('alert-msg').innerText = msg;
+        const alertBox = document.getElementById('custom-alert');
+        alertBox.style.display = 'flex';
+        
+        const btn = alertBox.querySelector('.btn');
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.onclick = () => {
+            closeCustomAlert();
+            if(callback) callback();
+        };
+    }
+    
+    function closeCustomAlert() { document.getElementById('custom-alert').style.display = 'none'; }
+    function triggerExitAlert() { document.getElementById('exit-dialog').style.display = 'flex'; }
+    function closeExitAlert() { document.getElementById('exit-dialog').style.display = 'none'; }
+    function confirmExit() { closeExitAlert(); showScreen('home-screen'); }
+    function handleLogout() { if(confirm(i18n[appLang].logout)) location.reload(); }
+
+    function openDetailer(imgSrc) {
+        document.getElementById('detailer-img').src = imgSrc;
+        document.getElementById('detailer-popup').style.display = 'flex';
+    }
+    function closeDetailer() {
+        document.getElementById('detailer-popup').style.display = 'none';
+    }
+
+    function openPdfPopup(pdfUrl) {
+        document.getElementById('pdf-manual-download').href = pdfUrl;
+        const viewerUrl = "https://docs.google.com/gview?embedded=true&url=" + encodeURIComponent(pdfUrl);
+        document.getElementById('pdf-frame').src = viewerUrl;
+        document.getElementById('pdf-popup').style.display = 'flex';
+    }
+
+    function closePdfPopup() {
+        document.getElementById('pdf-popup').style.display = 'none';
+        document.getElementById('pdf-frame').src = ""; 
+    }
+    
+    let currentDetailerImg = "";
+    function triggerDetailer() {
+        if(currentDetailerImg) openDetailer(currentDetailerImg);
+    }
+
+    // --- 4. AUTH & DATA LOGIC WITH SECURITY ---
+    
+    async function handleAuth(btn) {
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        if(!email) return showAlert(i18n[appLang].err, i18n[appLang].err_email);
+        if(!currentUid) return showAlert(i18n[appLang].err, i18n[appLang].err_server);
+
+        btn.innerText = i18n[appLang].loading;
+        
+        try {
+            const snapshot = await db.collection('users').where('email', '==', email).get();
+            
+            if (!snapshot.empty) {
+                const userDoc = snapshot.docs[0];
+                currentUser = userDoc.data();
+                currentUser.docId = userDoc.id; 
+                
+                if (!currentUser.uid) {
+                    currentUser.uid = currentUid;
+                    await db.collection('users').doc(currentUser.docId).update({ uid: currentUid });
+                } else if (currentUser.uid !== currentUid) {
+                    btn.innerText = i18n[appLang].next;
+                    return showAlert(i18n[appLang].security_alert, i18n[appLang].err_device);
+                }
+
+                renderHome();
+                showScreen('home-screen');
+                btn.innerText = i18n[appLang].next;
+
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'login', email: email })
+                }).catch(e => console.error("Sheet sync error", e));
+
+            } else {
+                document.getElementById('reg-email-hidden').value = email; 
+                showScreen('register-screen');
+                btn.innerText = i18n[appLang].next;
+            }
+        } catch (error) {
+            console.error("Firebase Auth Error: ", error);
+            showAlert(i18n[appLang].err, i18n[appLang].err_conn);
+            btn.innerText = i18n[appLang].next;
+        }
+    }
+
+    async function handleRegister(btn) {
+        const name = document.getElementById('reg-name').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const email = document.getElementById('reg-email-hidden').value.trim().toLowerCase(); 
+        
+        if(!name || !phone) return showAlert(i18n[appLang].err, i18n[appLang].err_fill);
+        
+        btn.innerText = i18n[appLang].loading;
+
+        const newUser = {
+            uid: currentUid, 
+            name: name,
+            phone: phone,
+            email: email,
+            totalScore: 0,
+            completedLevels: []
+        };
+
+        try {
+            await db.collection('users').doc(currentUid).set(newUser);
+            currentUser = newUser;
+            currentUser.docId = currentUid; 
+            
+            renderHome();
+            showScreen('home-screen');
+            btn.innerText = i18n[appLang].start_playing;
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'register', name, email, phone })
+            }).catch(e => console.error("Sheet sync error", e));
+
+        } catch (error) {
+            console.error("Firebase Registration Error: ", error);
+            showAlert(i18n[appLang].err, i18n[appLang].err_reg);
+            btn.innerText = i18n[appLang].start_playing;
+        }
+    }
+
+    // --- 5. GAME UI LOGIC ---
+    function renderHome() {
+        document.getElementById('display-name').innerText = currentUser.name;
+        document.getElementById('display-score').innerText = currentUser.totalScore;
+        const grid = document.getElementById('level-grid'); 
+        grid.innerHTML = '';
+
+        LEVEL_CONFIG.forEach(lvl => {
+            const div = document.createElement('div');
+            const isDone = currentUser.completedLevels.includes(lvl.id);
+            
+            if (!lvl.isActive) {
+                div.className = 'level-btn locked';
+                div.innerHTML = `<span>${lvl.id}</span>`; 
+            } else if (isDone) {
+                div.className = 'level-btn completed';
+                div.innerHTML = '<div class="star-img"></div>';
+            } else {
+                div.className = 'level-btn';
+                div.innerHTML = `
+                    <img src="assets/level_icon.png" class="level-icon-img" alt="icon">
+                    <span>${lvl.id}</span>
+                `;
+                div.onclick = () => startLevel(lvl.id);
+            }
+            grid.appendChild(div);
+        });
+        
+        updateRewardsUI();
+    }
+
+    function startLevel(id) {
+        currentLevelId = id;
+        const cfg = LEVEL_CONFIG.find(l => l.id === id);
+        
+        if (cfg.type === 'video' || cfg.type === 'audio' || cfg.type === 'pdf') {
+            setupMediaScreen(cfg);
+        } else if (cfg.type === 'quiz') {
+            setupQuizScreen(cfg);
+        } else if (cfg.type === 'memory') {
+            setupMemoryGame(cfg); 
+        }
+    }
+
+    function setupMediaScreen(cfg) {
+        showScreen('media-screen');
+
+        const iconCon = document.getElementById('media-icon-container');
+        const contentArea = document.getElementById('media-content-area');
+        const btn = document.getElementById('media-next-btn');
+        const timerDisplay = document.getElementById('media-timer');
+        
+        iconCon.innerHTML = ''; contentArea.innerHTML = '';
+        btn.disabled = true; btn.classList.add('disabled');
+        
+        if(cfg.type === 'pdf') {
+            contentArea.innerHTML = `
+                <p>${i18n[appLang].read_doc}</p>
+                <div class="pdf-link-btn" id="pdf-trigger">
+                    <img src="assets/pdf_icon.png" class="pdf-icon-img" alt="PDF">
+                    <span>${i18n[appLang].view_pdf}</span>
+                </div>
+            `;
+            btn.innerText = i18n[appLang].take_quiz;
+            document.getElementById('pdf-trigger').onclick = () => {
+                openPdfPopup(cfg.media);
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+            };
+            btn.onclick = () => setupQuizScreen(cfg); 
+        } 
+        else {
+            if (cfg.type === 'video') {
+                iconCon.innerHTML = `<i class="fas fa-video" style="font-size:50px; color:#0070c0;"></i>`;
+            } else {
+                iconCon.innerHTML = ''; 
+            }
+            
+            if(cfg.type === 'video') {
+                contentArea.innerHTML = `
+                    <video width="100%" height="200" controls autoplay style="border-radius:10px; background:black; max-width:100%;">
+                        <source src="${cfg.media}" type="video/mp4">
+                        Your browser does not support video.
+                    </video>
+                `;
+            } else {
+                 const audioImg = cfg.img || 'assets/Sensodyne Ramadan Logo.png';
+                 contentArea.innerHTML = `
+                    <div style="margin-bottom:15px; width:100%; display:flex; justify-content:center;">
+                        <img src="${audioImg}" style="width:100%; max-width:300px; height:auto; border-radius:12px; object-fit:contain; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    </div>
+                    <div style="background:#eee; padding:20px; border-radius:30px; margin-top:10px;">
+                        <audio controls autoplay style="width:100%;">
+                            <source src="${cfg.media}" type="audio/mpeg">
+                            Your browser does not support audio.
+                        </audio>
+                    </div>`;
+            }
+
+            btn.innerText = i18n[appLang].finish_level;
+            btn.onclick = () => completeLevel(cfg.points);
+        }
+
+        let timeLeft = cfg.unlockTime || 10;
+        timerDisplay.innerText = timeLeft;
+        if(timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if(timeLeft <= 0) {
+                if(cfg.type !== 'pdf') { 
+                    btn.disabled = false;
+                    btn.classList.remove('disabled');
+                }
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+    }
+
+    function setupQuizScreen(cfg) {
+        showScreen('quiz-screen'); 
+
+        document.getElementById('q-text').innerText = cfg.question[appLang];
+        const optCon = document.getElementById('q-options'); 
+        optCon.innerHTML = '';
+        
+        const thumb = document.getElementById('quiz-detailer-thumb');
+        const thumbContainer = document.getElementById('quiz-detailer-container');
+        if(cfg.detailer) {
+            currentDetailerImg = cfg.detailer;
+            thumb.src = cfg.detailer;
+            thumbContainer.style.display = 'block';
+        } else {
+            currentDetailerImg = "";
+            thumbContainer.style.display = 'none';
+        }
+
+        let attempts = 0;
+
+        cfg.options[appLang].forEach((opt, idx) => {
+            const btn = document.createElement('div'); 
+            btn.className = 'quiz-opt'; 
+            btn.innerText = opt;
+            btn.onclick = function() { 
+                document.querySelectorAll('.quiz-opt').forEach(b => b.style.pointerEvents = 'none');
+                
+                document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected')); 
+                this.classList.add('selected'); 
+                
+                setTimeout(() => {
+                    const isCorrect = (idx + 1) === cfg.correct;
+                    
+                    if(isCorrect) {
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                        completeLevel(10); 
+                    } else {
+                        attempts++;
+                        if (attempts < 2) {
+                            showAlert(i18n[appLang].wrong_ans, i18n[appLang].wrong_trial, () => {
+                                document.querySelectorAll('.quiz-opt').forEach(b => {
+                                    b.classList.remove('selected');
+                                    b.style.pointerEvents = 'auto';
+                                });
+                            });
+                        } else {
+                            showAlert(i18n[appLang].wrong_ans, i18n[appLang].wrong_zero, () => {
+                               completeLevel(0); 
+                            });
+                        }
+                    }
+                }, 500);
+            };
+            optCon.appendChild(btn);
+        });
+
+        const timerDisplay = document.getElementById('quiz-timer');
+        let timeLeft = cfg.unlockTime || 60;
+        timerDisplay.innerText = timeLeft;
+        
+        if(timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            if(timeLeft > 0) {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+            } else {
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+    }
+
+    function setupMemoryGame(cfg) { 
+        showScreen('minigame-screen'); 
+
+        const board = document.getElementById('memory-board');
+        board.innerHTML = '';
+        let matches = 0; let flipped = [];
+        const assets = ['claim_1.png', 'claim_2.png', 'senso_logo.png', 'container.png']; 
+        const cards = [...assets, ...assets].sort(() => Math.random() - 0.5);
+
+        cards.forEach((filename) => {
+            const card = document.createElement('div');
+            card.className = 'memory-card'; 
+            const imgHTML = `<img src="assets/${filename}" style="width:60%;">`;
+            card.innerHTML = imgHTML;
+            
+            card.onclick = () => {
+                if(flipped.length < 2 && !card.classList.contains('flipped')) {
+                    card.classList.add('flipped'); 
+                    flipped.push({card, val: filename});
+                    if(flipped.length === 2) {
+                        if(flipped[0].val === flipped[1].val) {
+                            matches++; flipped = [];
+                            if(matches === 4) {
+                                setTimeout(() => { confetti(); completeLevel(10); }, 500); 
+                            }
+                        } else {
+                            setTimeout(() => { flipped.forEach(f => { f.card.classList.remove('flipped'); }); flipped = []; }, 800);
+                        }
+                    }
+                }
+            };
+            board.appendChild(card);
+        });
+
+        const timerDisplay = document.getElementById('memory-timer');
+        let timeLeft = (cfg && cfg.unlockTime) ? cfg.unlockTime : 60;
+        timerDisplay.innerText = timeLeft;
+        
+        if(timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            if(timeLeft > 0) {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+            } else {
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+    }
+
+    async function completeLevel(pointsToAdd) {
+        if(!currentUser.completedLevels.includes(currentLevelId)) {
+            currentUser.completedLevels.push(currentLevelId);
+            currentUser.totalScore += pointsToAdd; 
+            
+            try {
+                await db.collection('users').doc(currentUser.docId).update({
+                    totalScore: currentUser.totalScore,
+                    completedLevels: currentUser.completedLevels
+                });
+            } catch (err) {
+                console.error("Error saving to Firebase", err);
+            }
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'saveProgress',
+                    email: currentUser.email,
+                    totalScore: currentUser.totalScore,
+                    completedLevels: currentUser.completedLevels
+                })
+            }).catch(e => console.error("Sheet sync error", e));
+        }
+        
+        document.getElementById('final-score').innerText = currentUser.totalScore;
+        showScreen('done-screen');
+        renderHome(); 
+    }
+
+    function openRewards() { document.getElementById('rewards-dialog').style.display = 'flex'; }
+    function closeRewards() { document.getElementById('rewards-dialog').style.display = 'none'; }
+    function updateRewardsUI() {
+        const s = currentUser.totalScore;
+        if(s >= 200) {
+            const item = document.getElementById('rwd-1');
+            item.classList.add('unlocked');
+            item.innerHTML = `
+                <div class="reward-icon">🎉</div>
+                <div><b data-i18n="congrats">${i18n[appLang].congrats}</b><br><span style="font-size:12px;" data-i18n="score_msg">${i18n[appLang].score_msg}</span></div>
+            `;
+        }
+    }
+
+    // Initialize with French language directly
+    setLanguage('fr');
+</script>
+</body>
+</html>
