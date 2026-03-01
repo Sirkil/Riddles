@@ -45,6 +45,8 @@
         align-items: center;
         padding: 20px;
         animation: fadeIn 0.4s ease-in-out;
+        z-index: 10;
+        margin-bottom: 80px; /* added margin to prevent overlap with the stamp */
     }
 
     .logo {
@@ -78,6 +80,44 @@
         flex-grow: 1; text-align: center; padding-right: 35px;
     }
 
+    /* --- FOOTER & STAMPS --- */
+    .app-footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        padding: 10px 25px;
+        text-align: center;
+        color: rgba(255, 255, 255, 1);
+        font-size: 6px;
+        font-weight: normal;
+        letter-spacing: 0.5px;
+        z-index: 2;
+    }
+
+    .claim-stamp {
+        position: absolute;
+        bottom: 25px; 
+        left: 50%; 
+        transform: translateX(-50%);
+        width: 100%; 
+        height: auto;
+        z-index: 1; 
+        pointer-events: none; 
+        display: block; 
+        text-align: center; 
+        white-space: nowrap;
+    }
+
+    .claim-stamp img {
+        width: 35vw; 
+        height: 35vw;
+        max-width: 120px; 
+        max-height: 120px;
+        object-fit: contain;
+        display: inline-block;
+        margin: 0 5px; 
+    }
+
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
  </style>
 </head>
@@ -88,8 +128,7 @@
     <h3 style="margin-bottom:30px; text-align: center;">Choose Your Country<br><span style="font-size: 16px; font-weight: normal; color: rgba(255,255,255,0.8);">Choisissez votre pays</span></h3>
     
     <button class="btn" onclick="window.location.href='english.html'" style="margin-bottom: 20px;">
-        <img src="assets/egypt.png" alt="UK Flag">
-        <span>Egypt</span>
+        <img src="assets/egypt.png" alt="UK Flag"> <span>Egypt</span>
     </button>
     
     <button class="btn" onclick="window.location.href='french.html'">
@@ -97,5 +136,16 @@
         <span>Morocco</span>
     </button>
 </div>
+
+<div id="claim-stamp" class="claim-stamp">
+    <img src="assets/claim_3.png" alt="Claim 3">
+    <img src="assets/claim_1.png" alt="Claim 1">
+    <img src="assets/claim_2.png" alt="Claim 2">
+</div>
+
+<div class="app-footer">
+    <Pm-Code>PM-EG-SENO-26-00001</Pm-Code>
+</div>
+
 </body>
 </html>
