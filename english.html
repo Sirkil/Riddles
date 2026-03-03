@@ -615,7 +615,7 @@
 
 <script>
     // --- 1. CONFIGURATION ---
-    const API_URL = "https://script.google.com/macros/s/AKfycbxyAbNkAl7toIm4sGLSP9JBWtbyha4hiPy32crPLBeL3cTrlw5vmUWaSsWDOSxekqeQ/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbwE1JNdYg1vB2UmIO0T6HEJZTmZNt0aTLrlgtKFF1f_dRUzqoOMj0RJXm8rTmJR3BOf/exec"; 
 
     // --- FIREBASE SETUP ---
     const firebaseConfig = {
@@ -793,7 +793,7 @@
 
                 fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'login', email: email })
+                    body: JSON.stringify({ action: 'login', email: email,country: 'Egypt' })
                 }).catch(e => console.error("Sheet sync error", e));
 
             } else {
@@ -838,7 +838,7 @@
 
             fetch(API_URL, {
                 method: 'POST',
-                body: JSON.stringify({ action: 'register', name, email, phone })
+                body: JSON.stringify({ action: 'register', name, email, phone,country: 'Egypt' })
             }).catch(e => console.error("Sheet sync error", e));
 
         } catch (error) {
@@ -1111,7 +1111,8 @@
                     action: 'saveProgress',
                     email: currentUser.email,
                     totalScore: currentUser.totalScore,
-                    completedLevels: currentUser.completedLevels
+                    completedLevels: currentUser.completedLevels,
+                    country: 'Egypt'
                 })
             }).catch(e => console.error("Sheet sync error", e));
         }
