@@ -883,7 +883,7 @@ function showScreen(id) {
 
     // --- 4. AUTH & DATA LOGIC WITH SECURITY ---
     
-    async function handleAuth(btn) {
+async function handleAuth(btn) {
         const email = document.getElementById('login-email').value.trim().toLowerCase();
         if(!email) return showAlert(i18n[appLang].err, i18n[appLang].err_email);
         if(!currentUid) return showAlert(i18n[appLang].err, i18n[appLang].err_server);
@@ -895,7 +895,15 @@ function showScreen(id) {
             
             if (!snapshot.empty) {
                 const userDoc = snapshot.docs[0];
-                currentUser = userDoc.data();
+                const data = userDoc.data();
+                
+                // --- NEW COUNTRY CHECK ---
+                if (data.country && data.country !== 'Morocco') {
+                    btn.innerText = i18n[appLang].next;
+                    return showAlert(i18n[appLang].err, "Cet e-mail est enregistré dans la version égyptienne. Vous ne pouvez pas vous connecter ici.");
+                }
+
+                currentUser = data;
                 currentUser.docId = userDoc.id; 
                 
                 if (!currentUser.uid) {
@@ -927,7 +935,7 @@ function showScreen(id) {
         }
     }
 
-    async function handleRegister(btn) {
+async function handleRegister(btn) {
         const name = document.getElementById('reg-name').value.trim();
         const phone = document.getElementById('reg-phone').value.trim();
         const email = document.getElementById('reg-email-hidden').value.trim().toLowerCase(); 
@@ -941,6 +949,7 @@ function showScreen(id) {
             name: name,
             phone: phone,
             email: email,
+            country: 'Morocco', // --- ADDED COUNTRY IDENTIFIER ---
             totalScore: 0,
             completedLevels: []
         };
